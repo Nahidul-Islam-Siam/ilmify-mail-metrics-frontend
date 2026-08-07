@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import type { ChildrenProps } from '../../types/rbac';
 
-export default function DashboardShell({ children }) {
+export default function DashboardShell({ children }: ChildrenProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (

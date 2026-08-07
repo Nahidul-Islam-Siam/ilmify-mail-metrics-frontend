@@ -3,21 +3,22 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePermission } from '../../hooks/usePermission';
+import type { RoleName, UserRole } from '../../types/rbac';
 
-export default function Topbar({ onMenuClick }) {
+export default function Topbar({ onMenuClick }: { onMenuClick(): void }) {
   const { user, role, switchRoleDemo } = usePermission();
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const notifRef = useRef(null);
-  const profileRef = useRef(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setNotifOpen(false);
       }
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
       }
     }
@@ -25,7 +26,7 @@ export default function Topbar({ onMenuClick }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const getRoleBadgeStyle = (roleName) => {
+  const getRoleBadgeStyle = (roleName: RoleName) => {
     switch (roleName) {
       case 'Super Admin':
         return { bg: '#FEF2F2', color: '#EF4444', border: '#FCA5A5' };
@@ -87,7 +88,7 @@ export default function Topbar({ onMenuClick }) {
           border: '1px solid #E4E7EC', padding: '3px 4px', borderRadius: '20px'
         }}>
           <span style={{ fontSize: '11px', fontWeight: 700, color: '#98A2B3', padding: '0 8px' }}>Test Role:</span>
-          {['Super Admin', 'Admin', 'User', 'Sub User'].map((r) => (
+          {(['Super Admin', 'Admin', 'User', 'Sub User'] satisfies UserRole[]).map((r) => (
             <button
               key={r}
               onClick={() => switchRoleDemo(r)}

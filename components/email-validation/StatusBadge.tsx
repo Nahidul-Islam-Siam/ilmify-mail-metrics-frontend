@@ -1,7 +1,7 @@
 'use client';
 
-export default function StatusBadge({ status }) {
-  const getStyle = (st) => {
+export default function StatusBadge({ status }: { status: string }) {
+  const getStyle = (st: string) => {
     const clean = (st || '').toUpperCase();
     switch (clean) {
       case 'VALID':

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { usePermission } from '../../hooks/usePermission';
 
-export default function Sidebar({ isOpen }) {
+export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const pathname = usePathname() || '';
   const [validationOpen, setValidationOpen] = useState(false);
   const { hasPermission, role } = usePermission();
@@ -16,7 +16,7 @@ export default function Sidebar({ isOpen }) {
     }
   }, [pathname]);
 
-  const isActive = (path) => pathname === path;
+  const isActive = (path: string): boolean => pathname === path;
 
   return (
     <aside 

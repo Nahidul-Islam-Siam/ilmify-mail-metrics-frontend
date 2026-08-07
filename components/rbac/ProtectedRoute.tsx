@@ -1,8 +1,16 @@
 'use client';
 
 import { usePermission } from '../../hooks/usePermission';
+import type { ReactNode } from 'react';
+import type { PermissionName } from '../../types/rbac';
 
-export default function ProtectedRoute({ permission, permissions, children }) {
+interface ProtectedRouteProps {
+  permission?: PermissionName;
+  permissions?: PermissionName[];
+  children: ReactNode;
+}
+
+export default function ProtectedRoute({ permission, permissions, children }: ProtectedRouteProps) {
   const { hasPermission, role } = usePermission();
 
   if (role === 'Super Admin') {

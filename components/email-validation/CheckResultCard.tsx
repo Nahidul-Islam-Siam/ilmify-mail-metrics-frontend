@@ -2,7 +2,13 @@
 
 import StatusBadge from './StatusBadge';
 
-export default function CheckResultCard({ title, status, description }) {
+interface CheckResultCardProps {
+  title: string;
+  status: string;
+  description?: string;
+}
+
+export default function CheckResultCard({ title, status, description }: CheckResultCardProps) {
   const isOk = ['Passed', 'Clean', 'Verified', 'pass', 'valid'].includes(status);
   const isFail = ['Failed', 'Invalid', 'fail', 'invalid', 'blocked'].includes(status);
 

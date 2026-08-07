@@ -1,8 +1,18 @@
 'use client';
 
 import { usePermission } from '../../hooks/usePermission';
+import type { ReactNode } from 'react';
+import type { PermissionName } from '../../types/rbac';
 
-export default function PermissionGuard({ permission, permissions, requireAll = false, fallback = null, children }) {
+interface PermissionGuardProps {
+  permission?: PermissionName;
+  permissions?: PermissionName[];
+  requireAll?: boolean;
+  fallback?: ReactNode;
+  children: ReactNode;
+}
+
+export default function PermissionGuard({ permission, permissions, requireAll = false, fallback = null, children }: PermissionGuardProps) {
   const { hasPermission, role } = usePermission();
 
   if (role === 'Super Admin') {
