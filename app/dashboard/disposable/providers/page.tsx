@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '../../../../components/rbac/ProtectedRoute';
 
+interface DisposableProvider { name: string; category?: string; domainCount: number }
+
 export default function DisposableProviderManagementPage() {
-  const [providers, setProviders] = useState([]);
+  const [providers, setProviders] = useState<DisposableProvider[]>([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {

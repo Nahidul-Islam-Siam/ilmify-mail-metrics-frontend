@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 
 export default function EmailVerificationPage() {
@@ -8,9 +8,9 @@ export default function EmailVerificationPage() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const [verifState, setVerifState] = useState(null); // 'success' | 'failed'
+  const [verifState, setVerifState] = useState<'success' | 'failed' | null>(null);
 
-  const handleSendOtp = (e) => {
+  const handleSendOtp = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
@@ -21,7 +21,7 @@ export default function EmailVerificationPage() {
   };
 
 
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
@@ -118,7 +118,7 @@ export default function EmailVerificationPage() {
                 <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#344054', display: 'block', marginBottom: '6px' }}>6-Digit Code</label>
                 <input
                   type="text"
-                  maxLength="6"
+                  maxLength={6}
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="123456"

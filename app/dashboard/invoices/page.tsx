@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 const QrSvg = () => {
   const g = [
     "1111111011101111111",
@@ -23,7 +25,7 @@ const QrSvg = () => {
     "1111111011011101011"
   ];
   const cell = 6.8;
-  const rects = [];
+  const rects: ReactNode[] = [];
   g.forEach((row, y) => {
     row.split('').forEach((c, x) => {
       if (c === '1') {

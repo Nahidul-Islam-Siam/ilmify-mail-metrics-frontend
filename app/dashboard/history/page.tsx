@@ -4,8 +4,18 @@ import { useState } from 'react';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 import StatusBadge from '../../../components/email-validation/StatusBadge';
 
+interface HistoryRecord {
+  id: number;
+  email: string;
+  status: string;
+  score: number;
+  disposable: string;
+  mx: string;
+  date: string;
+}
+
 export default function ValidationHistoryPage() {
-  const [history, setHistory] = useState([
+  const [history, setHistory] = useState<HistoryRecord[]>([
     { id: 1, email: 'alex.rivera@acme.io', status: 'VALID', score: 98, disposable: 'Clean', mx: 'Passed', date: '2026-08-06 09:20' },
     { id: 2, email: 'john.doe@temp-mail.org', status: 'BLOCKED', score: 0, disposable: 'Blocked', mx: 'Passed', date: '2026-08-06 09:14' },
     { id: 3, email: 'sarah.smith@10minutemail.com', status: 'BLOCKED', score: 0, disposable: 'Blocked', mx: 'Passed', date: '2026-08-06 08:50' },
@@ -16,7 +26,7 @@ export default function ValidationHistoryPage() {
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [selectedRecord, setSelectedRecord] = useState<HistoryRecord | null>(null);
 
   const filtered = history.filter(item => {
     const matchesSearch = item.email.toLowerCase().includes(search.toLowerCase());

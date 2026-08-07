@@ -6,7 +6,7 @@ interface SheetOption { id: string; name: string; createdTime?: string }
 interface SheetSelectorProps {
   isOpen: boolean;
   sheets?: SheetOption[];
-  activeSheetId?: string;
+  activeSheetId?: string | null;
   onSelectSheet(id: string, name: string): void;
   onCreateNewSheet(title: string): void;
   onClose(): void;

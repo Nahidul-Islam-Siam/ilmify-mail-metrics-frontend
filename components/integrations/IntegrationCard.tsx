@@ -9,8 +9,8 @@ interface IntegrationCardProps {
   category?: string;
   connected?: boolean;
   status?: string;
-  accountEmail?: string;
-  sheetName?: string;
+  accountEmail?: string | null;
+  sheetName?: string | null;
   onConnect?: () => void;
   onManage?: () => void;
   onDisconnect?: () => void;

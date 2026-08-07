@@ -1,6 +1,6 @@
 'use client';
 
-export default function ErrorAlert({ message, title = 'Error', onClose }: { message?: string; title?: string; onClose?: () => void }) {
+export default function ErrorAlert({ message, title = 'Error', onClose }: { message?: string | null; title?: string; onClose?: () => void }) {
   if (!message) return null;
 
   return (

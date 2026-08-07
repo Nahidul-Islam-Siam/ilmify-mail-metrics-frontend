@@ -2,10 +2,10 @@
 
 interface SyncStatusProps {
   connected?: boolean;
-  accountEmail?: string;
-  sheetId?: string;
-  sheetName?: string;
-  lastSync?: string | number | Date;
+  accountEmail?: string | null;
+  sheetId?: string | null;
+  sheetName?: string | null;
+  lastSync?: string | number | Date | null;
   status?: string;
   onChangeSheet?: () => void;
   onSyncNow?: () => void;

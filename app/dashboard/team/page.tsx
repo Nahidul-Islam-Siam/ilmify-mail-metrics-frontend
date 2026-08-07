@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 
 export default function TeamPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -16,7 +16,7 @@ export default function TeamPage() {
     { name: 'Tom Barnes', email: 'tom@acme.com', role: 'Sub-User', status: 'Active', active: 'Yesterday', limit: '2,000 / mo' },
   ]);
 
-  const handleInvite = (e) => {
+  const handleInvite = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newEmail) return;
     setMembers([
@@ -41,7 +41,7 @@ export default function TeamPage() {
     { name: 'System', text: 'auto-blocked 150 disposable domains across sub-users', time: 'Yesterday' }
   ];
 
-  const getRoleBadge = (role) => {
+  const getRoleBadge = (role: string) => {
     switch (role) {
       case 'Super Admin':
         return { bg: '#FEF2F2', color: '#EF4444' };

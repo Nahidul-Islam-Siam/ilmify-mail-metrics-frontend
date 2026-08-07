@@ -1,17 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import ProtectedRoute from '../../../../components/rbac/ProtectedRoute';
 import CheckResultCard from '../../../../components/email-validation/CheckResultCard';
 import StatusBadge from '../../../../components/email-validation/StatusBadge';
 
 export default function SingleValidationDashboardPage() {
+  interface ValidationViewResult {
+    email: string;
+    status: string;
+    reason?: string;
+    score: number;
+    spamProbability: number;
+    risk: string;
+    verdict: string;
+    checks: Record<string, string>;
+  }
   const [emailInput, setEmailInput] = useState('test@example.com');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [result, setResult] = useState<ValidationViewResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleValidate = async (e) => {
+  const handleValidate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!emailInput) return;
 

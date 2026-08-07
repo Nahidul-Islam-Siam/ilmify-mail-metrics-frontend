@@ -1,11 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 
+interface DisposableDomain {
+  id: string;
+  domain: string;
+  provider_name: string;
+  category: string;
+  status: string;
+  created_at?: string;
+}
+interface DisposableProvider { name: string; domainCount: number; category?: string }
+
 export default function DisposableDomainsPage() {
-  const [domains, setDomains] = useState([]);
-  const [providers, setProviders] = useState([]);
+  const [domains, setDomains] = useState<DisposableDomain[]>([]);
+  const [providers, setProviders] = useState<DisposableProvider[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [activeCount, setActiveCount] = useState(0);
 
@@ -17,7 +27,7 @@ export default function DisposableDomainsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedDomainItem, setSelectedDomainItem] = useState(null);
+  const [selectedDomainItem, setSelectedDomainItem] = useState<DisposableDomain | null>(null);
 
   // Form states
   const [newDomain, setNewDomain] = useState('');
@@ -25,7 +35,7 @@ export default function DisposableDomainsPage() {
   const [newCategory, setNewCategory] = useState('Disposable');
   const [bulkInput, setBulkInput] = useState('');
 
-  const [toastMessage, setToastMessage] = useState(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -57,12 +67,12 @@ export default function DisposableDomainsPage() {
     }
   };
 
-  const showToast = (msg) => {
+  const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const handleAddDomain = async (e) => {
+  const handleAddDomain = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const res = await fetch('http://localhost:4000/api/disposable-domains', {
@@ -86,7 +96,7 @@ export default function DisposableDomainsPage() {
     }
   };
 
-  const handleBulkImport = async (e) => {
+  const handleBulkImport = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const domainList = bulkInput
       .split(/[\n,]+/)
@@ -117,7 +127,7 @@ export default function DisposableDomainsPage() {
     }
   };
 
-  const handleToggleStatus = async (id) => {
+  const handleToggleStatus = async (id: string) => {
     try {
       const res = await fetch(`http://localhost:4000/api/disposable-domains/${id}/status`, {
         method: 'PATCH'
@@ -131,7 +141,7 @@ export default function DisposableDomainsPage() {
     }
   };
 
-  const handleDeleteDomain = async (id) => {
+  const handleDeleteDomain = async (id: string) => {
     if (confirm('Are you sure you want to remove this disposable domain?')) {
       try {
         const res = await fetch(`http://localhost:4000/api/disposable-domains/${id}`, {
@@ -432,7 +442,7 @@ export default function DisposableDomainsPage() {
               <p style={{ fontSize: '12.5px', color: '#667085', margin: '0 0 16px 0' }}>Paste multiple domain names separated by newlines or commas.</p>
               <form onSubmit={handleBulkImport} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <textarea
-                  rows="6"
+                  rows={6}
                   placeholder="temp-domain1.com&#10;temp-domain2.org&#10;disposable3.net"
                   value={bulkInput}
                   onChange={(e) => setBulkInput(e.target.value)}

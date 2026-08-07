@@ -1,14 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 import PermissionGuard from '../../../components/rbac/PermissionGuard';
 import { usePermission } from '../../../hooks/usePermission';
+import type { PermissionDefinition, PermissionName, RbacUser, UserRole } from '../../../types/rbac';
+
+interface ManagedUser extends RbacUser { createdAt: string }
 
 export default function UserManagementPage() {
   const { user: currentUser, role: currentRole, hasPermission, getAllowedRolesToCreate, availablePermissions } = usePermission();
 
-  const [users, setUsers] = useState([
+  const [users, setUsers] = useState<ManagedUser[]>([
     {
       id: 'usr-super-admin-1',
       name: 'Alex Rivera',
@@ -49,21 +52,21 @@ export default function UserManagementPage() {
 
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
-  const [apiError, setApiError] = useState(null);
-  const [toastMessage, setToastMessage] = useState(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null);
 
   // Create Form State
   const [formName, setFormName] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formPassword, setFormPassword] = useState('');
-  const [formRole, setFormRole] = useState('');
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [formRole, setFormRole] = useState<UserRole | ''>('');
+  const [selectedPermissions, setSelectedPermissions] = useState<PermissionName[]>([]);
 
   const allowedRoles = getAllowedRolesToCreate();
 
@@ -73,19 +76,19 @@ export default function UserManagementPage() {
     }
   }, [allowedRoles]);
 
-  const showToast = (msg) => {
+  const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
   };
 
   // Group permissions by module
-  const groupedPermissions = availablePermissions.reduce((acc, perm) => {
+  const groupedPermissions = availablePermissions.reduce<Record<string, PermissionDefinition[]>>((acc, perm) => {
     if (!acc[perm.module]) acc[perm.module] = [];
     acc[perm.module].push(perm);
     return acc;
   }, {});
 
-  const handlePermissionToggle = (permName) => {
+  const handlePermissionToggle = (permName: PermissionName) => {
     if (selectedPermissions.includes(permName)) {
       setSelectedPermissions(selectedPermissions.filter(p => p !== permName));
     } else {
@@ -93,13 +96,13 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleCreateUser = async (e) => {
+  const handleCreateUser = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setApiError(null);
 
     // Validate permission ownership
     if (currentRole !== 'Super Admin') {
-      const myPermSet = new Set(currentUser.permissions || []);
+      const myPermSet = new Set(currentUser?.permissions || []);
       const unowned = selectedPermissions.filter(p => !myPermSet.has(p));
       if (unowned.length > 0) {
         setApiError(`Security Violation: You cannot assign permissions you do not own: [${unowned.join(', ')}]`);
@@ -139,7 +142,7 @@ export default function UserManagementPage() {
         id: `usr-${Math.random().toString(36).substr(2, 6)}`,
         name: formName,
         email: formEmail,
-        role: formRole,
+        role: formRole || 'Sub User',
         role_id: `role-${formRole.toLowerCase().replace(' ', '-')}`,
         permissions: selectedPermissions,
         createdAt: new Date().toISOString().split('T')[0]
@@ -151,7 +154,7 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleEditUser = (userToEdit) => {
+  const handleEditUser = (userToEdit: ManagedUser) => {
     setSelectedUser(userToEdit);
     setFormName(userToEdit.name);
     setFormEmail(userToEdit.email);
@@ -160,13 +163,14 @@ export default function UserManagementPage() {
     setShowEditModal(true);
   };
 
-  const handleUpdateUser = (e) => {
+  const handleUpdateUser = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!selectedUser) return;
     setUsers(users.map(u => u.id === selectedUser.id ? {
       ...u,
       name: formName,
       email: formEmail,
-      role: formRole,
+      role: formRole || selectedUser.role,
       permissions: selectedPermissions
     } : u));
     setShowEditModal(false);
@@ -174,7 +178,7 @@ export default function UserManagementPage() {
     showToast(`✓ Updated permissions for ${formName}`);
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = (userId: string) => {
     if (confirm('Are you sure you want to delete this user?')) {
       setUsers(users.filter(u => u.id !== userId));
       showToast('✓ User deleted successfully.');
@@ -197,7 +201,7 @@ export default function UserManagementPage() {
     return matchesSearch && matchesRole;
   });
 
-  const getRoleBadge = (roleName) => {
+  const getRoleBadge = (roleName: string) => {
     switch (roleName) {
       case 'Super Admin':
         return { bg: '#FEF2F2', color: '#EF4444', border: '#FCA5A5' };
@@ -472,7 +476,7 @@ export default function UserManagementPage() {
                   </div>
                   <select
                     value={formRole}
-                    onChange={(e) => setFormRole(e.target.value)}
+                    onChange={(e) => setFormRole(e.target.value as UserRole)}
                     required
                     style={{ width: '100%', padding: '10px 14px', background: '#F8FAFC', border: '1px solid #E4E7EC', borderRadius: '10px', fontSize: '13.5px', color: '#101828', outline: 'none', boxSizing: 'border-box' }}
                   >
@@ -501,7 +505,7 @@ export default function UserManagementPage() {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                           {groupedPermissions[moduleName].map((perm) => {
-                            const isOwnedByCreator = currentRole === 'Super Admin' || currentUser.permissions?.includes(perm.name);
+                            const isOwnedByCreator = currentRole === 'Super Admin' || currentUser?.permissions?.includes(perm.name);
                             return (
                               <label
                                 key={perm.id}
@@ -601,7 +605,7 @@ export default function UserManagementPage() {
                   <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#344054', display: 'block', marginBottom: '6px' }}>Role</label>
                   <select
                     value={formRole}
-                    onChange={(e) => setFormRole(e.target.value)}
+                    onChange={(e) => setFormRole(e.target.value as UserRole)}
                     style={{ width: '100%', padding: '10px 14px', background: '#F8FAFC', border: '1px solid #E4E7EC', borderRadius: '10px', fontSize: '13.5px', color: '#101828', outline: 'none', boxSizing: 'border-box' }}
                   >
                     {allowedRoles.map(roleOption => (

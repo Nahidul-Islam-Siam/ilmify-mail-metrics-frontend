@@ -12,9 +12,30 @@ import ErrorAlert from '../../../components/integrations/ErrorAlert';
 import ToggleSwitch from '../../../components/settings/ToggleSwitch';
 import SelectInput from '../../../components/settings/SelectInput';
 import SaveButton from '../../../components/settings/SaveButton';
+import type { ToastKind } from '../../../types/ui';
+
+interface GoogleStatus {
+  connected: boolean;
+  google_email: string | null;
+  sheet_id: string | null;
+  sheet_name: string | null;
+  status: string;
+  last_sync: string | null;
+}
+interface SheetOption { id: string; name: string; createdTime?: string }
+interface SyncLog {
+  id: string;
+  created_at: string;
+  sheet_id: string;
+  total_records: number;
+  synced_records: number;
+  failed_records: number;
+  status: 'completed' | 'partial' | 'failed';
+}
+interface CustomToastProps { message: string; show: boolean; type?: ToastKind; onClose(): void }
 
 // Toast Notification
-function CustomToast({ message, show, type = 'success', onClose }) {
+function CustomToast({ message, show, type = 'success', onClose }: CustomToastProps) {
   if (!show) return null;
   return (
     <div style={{
@@ -47,11 +68,11 @@ export default function IntegrationsDashboardPage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [loading, setLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [toast, setToast] = useState({ message: '', show: false, type: 'success' });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; show: boolean; type: ToastKind }>({ message: '', show: false, type: 'success' });
 
   // Google Integration Status State
-  const [googleStatus, setGoogleStatus] = useState({
+  const [googleStatus, setGoogleStatus] = useState<GoogleStatus>({
     connected: false,
     google_email: null,
     sheet_id: null,
@@ -61,7 +82,7 @@ export default function IntegrationsDashboardPage() {
   });
 
   // Spreadsheets List State
-  const [userSheets, setUserSheets] = useState([]);
+  const [userSheets, setUserSheets] = useState<SheetOption[]>([]);
   const [showSheetModal, setShowSheetModal] = useState(false);
   const [sheetsLoading, setSheetsLoading] = useState(false);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
@@ -74,9 +95,9 @@ export default function IntegrationsDashboardPage() {
   });
 
   // Sync Logs History
-  const [syncLogs, setSyncLogs] = useState([]);
+  const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
 
-  const notify = (msg, type = 'success') => {
+  const notify = (msg: string, type: ToastKind = 'success') => {
     setToast({ message: msg, show: true, type });
     setTimeout(() => setToast((t) => ({ ...t, show: false })), 3200);
   };
@@ -182,7 +203,7 @@ export default function IntegrationsDashboardPage() {
   };
 
   // 2. Select Target Sheet
-  const handleSelectSheet = async (sheetId, sheetName) => {
+  const handleSelectSheet = async (sheetId: string, sheetName: string) => {
     try {
       const res = await fetch('http://localhost:4000/api/integrations/google/select-sheet', {
         method: 'POST',
@@ -205,7 +226,7 @@ export default function IntegrationsDashboardPage() {
   };
 
   // 3. Create New Sheet Automatically
-  const handleCreateNewSheet = async (title) => {
+  const handleCreateNewSheet = async (title: string) => {
     try {
       const res = await fetch('http://localhost:4000/api/integrations/google/create-sheet', {
         method: 'POST',

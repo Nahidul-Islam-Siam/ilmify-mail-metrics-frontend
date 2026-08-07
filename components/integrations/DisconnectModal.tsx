@@ -4,7 +4,7 @@ interface DisconnectModalProps {
   isOpen: boolean;
   onConfirm(): void;
   onCancel(): void;
-  accountEmail?: string;
+  accountEmail?: string | null;
 }
 
 export default function DisconnectModal({ isOpen, onConfirm, onCancel, accountEmail }: DisconnectModalProps) {

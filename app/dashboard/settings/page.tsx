@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { usePermission } from '../../../hooks/usePermission';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 import SettingsLayout from '../../../components/settings/SettingsLayout';
@@ -14,9 +14,12 @@ import DomainTable from '../../../components/settings/DomainTable';
 import ScoreTable from '../../../components/settings/ScoreTable';
 import SaveButton from '../../../components/settings/SaveButton';
 import ConfirmationModal from '../../../components/settings/ConfirmationModal';
+import type { ToastKind } from '../../../types/ui';
+
+interface CustomToastProps { message: string; show: boolean; type?: ToastKind; onClose(): void }
 
 // Floating Toast Notification Component
-function CustomToast({ message, show, type = 'success', onClose }) {
+function CustomToast({ message, show, type = 'success', onClose }: CustomToastProps) {
   if (!show) return null;
   return (
     <div style={{
@@ -49,7 +52,7 @@ export default function SettingsDashboardPage() {
   const [activeSection, setActiveSection] = useState('general');
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [toast, setToast] = useState({ message: '', show: false, type: 'success' });
+  const [toast, setToast] = useState<{ message: string; show: boolean; type: ToastKind }>({ message: '', show: false, type: 'success' });
   const [showResetModal, setShowResetModal] = useState(false);
 
   // Settings State Dict
@@ -150,7 +153,7 @@ export default function SettingsDashboardPage() {
     webhook_url: 'https://api.acme.com/webhooks/mailmetric',
   });
 
-  const notify = (msg, type = 'success') => {
+  const notify = (msg: string, type: ToastKind = 'success') => {
     setToast({ message: msg, show: true, type });
     setTimeout(() => setToast((t) => ({ ...t, show: false })), 3200);
   };
@@ -170,8 +173,8 @@ export default function SettingsDashboardPage() {
         const json = await res.json();
         if (json.data && Array.isArray(json.data)) {
           const map = { ...settingsMap };
-          json.data.forEach((s) => {
-            map[s.key] = s.value;
+          json.data.forEach((s: { key: string; value: unknown }) => {
+            (map as Record<string, unknown>)[s.key] = s.value;
           });
           setSettingsMap(map);
         }
@@ -184,19 +187,19 @@ export default function SettingsDashboardPage() {
   };
 
   // Update Single Key in Local State
-  const setKey = (k, v) => {
+  const setKey = <K extends keyof typeof settingsMap>(k: K, v: (typeof settingsMap)[K]) => {
     setSettingsMap((prev) => ({ ...prev, [k]: v }));
   };
 
   // Save Current Active Section Settings to Backend API
-  const handleSaveSection = async (e) => {
+  const handleSaveSection = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();
     setSaveLoading(true);
 
     try {
       const payloadSettings = Object.keys(settingsMap).map((k) => ({
         key: k,
-        value: settingsMap[k]
+        value: settingsMap[k as keyof typeof settingsMap]
       }));
 
       const res = await fetch('http://localhost:4000/api/settings/update', {
@@ -665,7 +668,7 @@ export default function SettingsDashboardPage() {
                 <FormInput
                   label="Allowed Whitelisted IP Addresses (CIDR)"
                   value={Array.isArray(settingsMap.allowed_ip_addresses) ? settingsMap.allowed_ip_addresses.join(', ') : settingsMap.allowed_ip_addresses}
-                  onChange={(v) => setKey('allowed_ip_addresses', v)}
+                  onChange={(v) => setKey('allowed_ip_addresses', v.split(',').map((ip) => ip.trim()).filter(Boolean))}
                   hint="Comma-separated IP addresses or CIDR blocks (e.g. 192.168.1.1, 0.0.0.0/0 for all)"
                 />
 

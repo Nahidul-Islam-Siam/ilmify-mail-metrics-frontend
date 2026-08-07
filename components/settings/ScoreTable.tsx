@@ -1,11 +1,10 @@
 'use client';
 
-type ScoreRuleStatus = 'active' | 'disabled';
-interface ScoreRule { id: string | number; rule_name: string; score: number; status: ScoreRuleStatus }
+interface ScoreRule { id: string | number; rule_name: string; score: number; status: string }
 interface ScoreTableProps {
   rules?: ScoreRule[];
   onUpdateScore(id: string | number, score: number): void;
-  onToggleStatus(id: string | number, status: ScoreRuleStatus): void;
+  onToggleStatus(id: string | number, status: string): void;
 }
 
 export default function ScoreTable({ rules = [], onUpdateScore, onToggleStatus }: ScoreTableProps) {

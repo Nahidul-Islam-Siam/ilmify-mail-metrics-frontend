@@ -1,23 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type DragEvent, type ChangeEvent } from 'react';
 import ProtectedRoute from '../../../../components/rbac/ProtectedRoute';
+
+interface ParsedDomain { domain: string; status: 'New' }
 
 export default function BulkImportDisposableDomainsPage() {
   const [dragActive, setDragActive] = useState(false);
   const [fileName, setFileName] = useState('');
-  const [parsedDomains, setParsedDomains] = useState([]);
+  const [parsedDomains, setParsedDomains] = useState<ParsedDomain[]>([]);
   const [stats, setStats] = useState({ total: 0, newDomains: 0, duplicates: 0 });
   const [providerName, setProviderName] = useState('Bulk Imported Provider');
   const [category, setCategory] = useState('Disposable Email');
   const [importing, setImporting] = useState(false);
-  const [toastMessage, setToastMessage] = useState(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const processFileContent = (content, name) => {
+  const processFileContent = (content: string, name: string) => {
     setFileName(name);
     const lines = content.split(/[\r\n,]+/);
-    const set = new Set();
-    const list = [];
+    const set = new Set<string>();
+    const list: ParsedDomain[] = [];
     let dupCount = 0;
 
     lines.forEach((line) => {
@@ -40,23 +42,23 @@ export default function BulkImportDisposableDomainsPage() {
     });
   };
 
-  const handleFileUpload = (file) => {
+  const handleFileUpload = (file?: File) => {
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
-      processFileContent(e.target.result, file.name);
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (typeof e.target?.result === 'string') processFileContent(e.target.result, file.name);
     };
     reader.readAsText(file);
   };
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
     else if (e.type === 'dragleave') setDragActive(false);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -137,7 +139,7 @@ export default function BulkImportDisposableDomainsPage() {
             type="file"
             id="fileInput"
             accept=".csv, .txt"
-            onChange={(e) => handleFileUpload(e.target.files[0])}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => handleFileUpload(e.currentTarget.files?.[0])}
             style={{ display: 'none' }}
           />
 
