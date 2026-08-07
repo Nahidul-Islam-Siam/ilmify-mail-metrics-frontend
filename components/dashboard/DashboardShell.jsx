@@ -1,0 +1,41 @@
+'use client';
+import { useState } from 'react';
+import Sidebar from './Sidebar';
+import Topbar from './Topbar';
+
+export default function DashboardShell({ children }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  return (
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      width: '100%',
+      background: '#F8FAFC',
+      fontFamily: "'Inter', system-ui, sans-serif"
+    }}>
+      {/* Left Sidebar - Fixed 264px Width */}
+      <Sidebar isOpen={mobileMenuOpen} />
+      
+      {/* Right Main Column */}
+      <div style={{
+        flex: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#F8FAFC'
+      }}>
+        <Topbar onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+        <main style={{
+          flex: 1,
+          padding: '28px 32px',
+          background: '#F8FAFC',
+          minWidth: 0,
+          boxSizing: 'border-box'
+        }}>
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
