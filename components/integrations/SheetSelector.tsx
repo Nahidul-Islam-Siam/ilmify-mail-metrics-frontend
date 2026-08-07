@@ -1,6 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
+
+interface SheetOption { id: string; name: string; createdTime?: string }
+interface SheetSelectorProps {
+  isOpen: boolean;
+  sheets?: SheetOption[];
+  activeSheetId?: string;
+  onSelectSheet(id: string, name: string): void;
+  onCreateNewSheet(title: string): void;
+  onClose(): void;
+  loading?: boolean;
+}
 
 export default function SheetSelector({
   isOpen,
@@ -10,12 +21,12 @@ export default function SheetSelector({
   onCreateNewSheet,
   onClose,
   loading = false
-}) {
+}: SheetSelectorProps) {
   const [newSheetTitle, setNewSheetTitle] = useState('');
 
   if (!isOpen) return null;
 
-  const handleCreate = (e) => {
+  const handleCreate = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newSheetTitle.trim()) return;
     onCreateNewSheet(newSheetTitle.trim());

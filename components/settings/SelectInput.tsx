@@ -1,33 +1,35 @@
 'use client';
 
-export default function FormInput({
+import type { SelectOption } from '../../types/ui';
+
+interface SelectInputProps {
+  label?: string;
+  value: string;
+  onChange(value: string): void;
+  options?: SelectOption[];
+  hint?: string;
+  disabled?: boolean;
+}
+
+export default function SelectInput({
   label,
-  type = 'text',
   value,
   onChange,
-  placeholder,
+  options = [],
   hint,
-  required = false,
-  disabled = false,
-  min,
-  max
-}) {
+  disabled = false
+}: SelectInputProps) {
   return (
     <div style={{ marginBottom: '18px' }}>
       {label && (
         <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '6px' }}>
-          {label} {required && <span style={{ color: '#EF4444' }}>*</span>}
+          {label}
         </label>
       )}
-      <input
-        type={type}
-        value={value !== undefined && value !== null ? value : ''}
+      <select
+        value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
         disabled={disabled}
-        min={min}
-        max={max}
         style={{
           width: '100%',
           padding: '10px 14px',
@@ -37,9 +39,15 @@ export default function FormInput({
           outline: 'none',
           background: disabled ? '#F8FAFC' : '#FFFFFF',
           color: '#0F172A',
-          transition: 'border-color 0.15s ease'
+          cursor: disabled ? 'not-allowed' : 'pointer'
         }}
-      />
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
       {hint && (
         <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748B' }}>
           {hint}

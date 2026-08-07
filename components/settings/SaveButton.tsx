@@ -1,6 +1,15 @@
 'use client';
 
-export default function SaveButton({ loading = false, disabled = false, text = 'Save Changes', onClick, onReset, showReset = true }) {
+interface SaveButtonProps {
+  loading?: boolean;
+  disabled?: boolean;
+  text?: string;
+  onClick?: () => void;
+  onReset?: () => void;
+  showReset?: boolean;
+}
+
+export default function SaveButton({ loading = false, disabled = false, text = 'Save Changes', onClick, onReset, showReset = true }: SaveButtonProps) {
   return (
     <div style={{
       display: 'flex',

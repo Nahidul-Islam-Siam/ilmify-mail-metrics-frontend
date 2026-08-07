@@ -1,11 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
 
-export default function FileUpload({ label, currentUrl, onUpload, accept = 'image/*' }) {
+interface FileUploadProps {
+  label?: string;
+  currentUrl?: string;
+  onUpload?: (file: File) => void;
+  accept?: string;
+}
+
+export default function FileUpload({ label, currentUrl, onUpload, accept = 'image/*' }: FileUploadProps) {
   const [fileName, setFileName] = useState('');
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setFileName(file.name);
@@ -41,7 +48,7 @@ export default function FileUpload({ label, currentUrl, onUpload, accept = 'imag
             fontSize: '20px',
             overflow: 'hidden'
           }}>
-            <img src={currentUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src={currentUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} onError={(e: SyntheticEvent<HTMLImageElement>) => { e.currentTarget.style.display = 'none'; }} />
             <span style={{ fontSize: '20px' }}>🖼️</span>
           </div>
         ) : (

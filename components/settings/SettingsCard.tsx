@@ -1,6 +1,17 @@
 'use client';
 
-export default function SettingsCard({ title, subtitle, icon, badge, children, headerAction }) {
+import type { ReactNode } from 'react';
+
+interface SettingsCardProps {
+  title: string;
+  subtitle?: string;
+  icon?: ReactNode;
+  badge?: string;
+  children: ReactNode;
+  headerAction?: ReactNode;
+}
+
+export default function SettingsCard({ title, subtitle, icon, badge, children, headerAction }: SettingsCardProps) {
   return (
     <div className="card" style={{ padding: '28px', marginBottom: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>

@@ -1,6 +1,14 @@
 'use client';
 
-export default function ScoreTable({ rules = [], onUpdateScore, onToggleStatus }) {
+type ScoreRuleStatus = 'active' | 'disabled';
+interface ScoreRule { id: string | number; rule_name: string; score: number; status: ScoreRuleStatus }
+interface ScoreTableProps {
+  rules?: ScoreRule[];
+  onUpdateScore(id: string | number, score: number): void;
+  onToggleStatus(id: string | number, status: ScoreRuleStatus): void;
+}
+
+export default function ScoreTable({ rules = [], onUpdateScore, onToggleStatus }: ScoreTableProps) {
   return (
     <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: '14px', marginTop: '16px' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>

@@ -1,7 +1,15 @@
 'use client';
 
-export default function PermissionSelector({ availablePermissions = [], selectedPermissions = [], onChange }) {
-  const handleTogglePermission = (permName) => {
+import type { PermissionDefinition, PermissionName } from '../../types/rbac';
+
+interface PermissionSelectorProps {
+  availablePermissions?: Array<PermissionDefinition | PermissionName>;
+  selectedPermissions?: PermissionName[];
+  onChange(permissions: PermissionName[]): void;
+}
+
+export default function PermissionSelector({ availablePermissions = [], selectedPermissions = [], onChange }: PermissionSelectorProps) {
+  const handleTogglePermission = (permName: PermissionName) => {
     if (selectedPermissions.includes(permName)) {
       onChange(selectedPermissions.filter(p => p !== permName));
     } else {

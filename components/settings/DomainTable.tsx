@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 
-export default function DomainTable({ whitelist = [], blacklist = [], onUpdateWhitelist, onUpdateBlacklist }) {
+type DomainList = 'whitelist' | 'blacklist';
+interface DomainTableProps {
+  whitelist?: string[];
+  blacklist?: string[];
+  onUpdateWhitelist(domains: string[]): void;
+  onUpdateBlacklist(domains: string[]): void;
+}
+
+export default function DomainTable({ whitelist = [], blacklist = [], onUpdateWhitelist, onUpdateBlacklist }: DomainTableProps) {
   const [newDomain, setNewDomain] = useState('');
-  const [targetList, setTargetList] = useState('blacklist');
+  const [targetList, setTargetList] = useState<DomainList>('blacklist');
 
-  const handleAddDomain = (e) => {
+  const handleAddDomain = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newDomain.trim()) return;
 
@@ -24,7 +32,7 @@ export default function DomainTable({ whitelist = [], blacklist = [], onUpdateWh
     setNewDomain('');
   };
 
-  const handleRemoveDomain = (domain, listType) => {
+  const handleRemoveDomain = (domain: string, listType: DomainList) => {
     if (listType === 'whitelist') {
       onUpdateWhitelist(whitelist.filter(d => d !== domain));
     } else {
@@ -53,7 +61,7 @@ export default function DomainTable({ whitelist = [], blacklist = [], onUpdateWh
         />
         <select
           value={targetList}
-          onChange={(e) => setTargetList(e.target.value)}
+          onChange={(e) => setTargetList(e.target.value as DomainList)}
           style={{
             padding: '10px 14px',
             border: '1px solid #CBD5E1',
@@ -101,7 +109,7 @@ export default function DomainTable({ whitelist = [], blacklist = [], onUpdateWh
             <tbody>
               {blacklist.length === 0 ? (
                 <tr>
-                  <td colSpan="4" style={{ padding: '16px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
+                  <td colSpan={4} style={{ padding: '16px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
                     No blacklisted domains added yet.
                   </td>
                 </tr>
@@ -157,7 +165,7 @@ export default function DomainTable({ whitelist = [], blacklist = [], onUpdateWh
             <tbody>
               {whitelist.length === 0 ? (
                 <tr>
-                  <td colSpan="3" style={{ padding: '16px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
+                  <td colSpan={3} style={{ padding: '16px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
                     No whitelisted domains added yet.
                   </td>
                 </tr>

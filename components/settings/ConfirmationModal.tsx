@@ -1,6 +1,17 @@
 'use client';
 
-export default function ConfirmationModal({ isOpen, title, message, confirmText = 'Confirm', cancelText = 'Cancel', onConfirm, onCancel, isDanger = false }) {
+interface ConfirmationModalProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm(): void;
+  onCancel(): void;
+  isDanger?: boolean;
+}
+
+export default function ConfirmationModal({ isOpen, title, message, confirmText = 'Confirm', cancelText = 'Cancel', onConfirm, onCancel, isDanger = false }: ConfirmationModalProps) {
   if (!isOpen) return null;
 
   return (

@@ -1,6 +1,15 @@
 'use client';
 
-export default function ToggleSwitch({ label, description, checked, onChange, disabled = false, badgeText }) {
+interface ToggleSwitchProps {
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange(checked: boolean): void;
+  disabled?: boolean;
+  badgeText?: string;
+}
+
+export default function ToggleSwitch({ label, description, checked, onChange, disabled = false, badgeText }: ToggleSwitchProps) {
   return (
     <div style={{
       display: 'flex',

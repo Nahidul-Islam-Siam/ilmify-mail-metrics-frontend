@@ -1,6 +1,6 @@
 'use client';
 
-export default function GoogleOAuthButton({ onClick, loading = false, disabled = false }) {
+export default function GoogleOAuthButton({ onClick, loading = false, disabled = false }: { onClick(): void; loading?: boolean; disabled?: boolean }) {
   return (
     <button
       onClick={onClick}

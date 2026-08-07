@@ -1,6 +1,16 @@
 'use client';
 
-export default function SyncHistoryTable({ logs = [] }) {
+interface SyncLog {
+  id: string;
+  created_at: string;
+  sheet_id: string;
+  total_records: number;
+  synced_records: number;
+  failed_records: number;
+  status: 'completed' | 'partial' | 'failed';
+}
+
+export default function SyncHistoryTable({ logs = [] }: { logs?: SyncLog[] }) {
   return (
     <div className="card" style={{ padding: '28px' }}>
       <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', marginTop: 0, marginBottom: '6px', fontFamily: 'Sora, sans-serif' }}>

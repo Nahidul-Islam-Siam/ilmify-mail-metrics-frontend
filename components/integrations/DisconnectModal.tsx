@@ -1,6 +1,13 @@
 'use client';
 
-export default function DisconnectModal({ isOpen, onConfirm, onCancel, accountEmail }) {
+interface DisconnectModalProps {
+  isOpen: boolean;
+  onConfirm(): void;
+  onCancel(): void;
+  accountEmail?: string;
+}
+
+export default function DisconnectModal({ isOpen, onConfirm, onCancel, accountEmail }: DisconnectModalProps) {
   if (!isOpen) return null;
 
   return (

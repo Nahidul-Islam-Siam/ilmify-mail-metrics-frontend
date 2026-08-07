@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import type { RoleName } from '../../types/rbac';
 
 export const SETTINGS_SECTIONS = [
   { id: 'general', label: '1. General', icon: '⚙️', category: 'general', permission: 'settings.manage' },
@@ -18,7 +19,14 @@ export const SETTINGS_SECTIONS = [
   { id: 'integrations', label: '13. Webhooks & Apps', icon: '🔌', category: 'api', permission: 'settings.manage' }
 ];
 
-export default function SettingsLayout({ activeSection, onSelectSection, role, children }) {
+interface SettingsLayoutProps {
+  activeSection: string;
+  onSelectSection(section: string): void;
+  role: RoleName;
+  children: ReactNode;
+}
+
+export default function SettingsLayout({ activeSection, onSelectSection, role, children }: SettingsLayoutProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredSections = SETTINGS_SECTIONS.filter(s =>

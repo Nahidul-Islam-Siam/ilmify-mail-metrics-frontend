@@ -1,5 +1,22 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
+interface IntegrationCardProps {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  category?: string;
+  connected?: boolean;
+  status?: string;
+  accountEmail?: string;
+  sheetName?: string;
+  onConnect?: () => void;
+  onManage?: () => void;
+  onDisconnect?: () => void;
+  disabled?: boolean;
+}
+
 export default function IntegrationCard({
   title,
   description,
@@ -13,7 +30,7 @@ export default function IntegrationCard({
   onManage,
   onDisconnect,
   disabled = false
-}) {
+}: IntegrationCardProps) {
   return (
     <div className="card" style={{
       padding: '24px',

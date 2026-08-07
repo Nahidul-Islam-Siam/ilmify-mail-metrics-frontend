@@ -1,5 +1,18 @@
 'use client';
 
+interface SyncStatusProps {
+  connected?: boolean;
+  accountEmail?: string;
+  sheetId?: string;
+  sheetName?: string;
+  lastSync?: string | number | Date;
+  status?: string;
+  onChangeSheet?: () => void;
+  onSyncNow?: () => void;
+  onDisconnect?: () => void;
+  syncLoading?: boolean;
+}
+
 export default function SyncStatus({
   connected = false,
   accountEmail,
@@ -11,7 +24,7 @@ export default function SyncStatus({
   onSyncNow,
   onDisconnect,
   syncLoading = false
-}) {
+}: SyncStatusProps) {
   if (!connected) return null;
 
   return (
