@@ -1,10 +1,10 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent, type KeyboardEvent } from 'react';
 import Link from 'next/link';
 
 export default function VerifyOtpPage() {
   const [otp, setOtp] = useState(['', '', '', '']);
-  const inputs = useRef([]);
+  const inputs = useRef<Array<HTMLInputElement | null>>([]);
   const [countdown, setCountdown] = useState(30);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function VerifyOtpPage() {
     }
   }, [countdown]);
 
-  const handleChange = (e, index) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const val = e.target.value;
     if (/[^0-9]/.test(val)) return; // numbers only
 
@@ -24,13 +24,13 @@ export default function VerifyOtpPage() {
 
     // auto-focus next
     if (val && index < 3) {
-      inputs.current[index + 1].focus();
+      inputs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyDown = (e, index) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputs.current[index - 1].focus();
+      inputs.current[index - 1]?.focus();
     }
   };
 
@@ -52,11 +52,11 @@ export default function VerifyOtpPage() {
             <input
               key={index}
               type="text"
-              maxLength="1"
+              maxLength={1}
               value={data}
               onChange={e => handleChange(e, index)}
               onKeyDown={e => handleKeyDown(e, index)}
-              ref={el => (inputs.current[index] = el)}
+              ref={(el) => { inputs.current[index] = el; }}
               required
             />
           ))}

@@ -1,11 +1,13 @@
 import './auth.css';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Authentication — iLMIFY MailMetric',
 };
 
-export default function AuthLayout({ children }) {
+export default function AuthLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div className="auth-root">
       {/* Left Sidebar (Desktop only) */}

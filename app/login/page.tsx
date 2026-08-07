@@ -7,7 +7,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSocialLogin = (provider) => {
+  const handleSocialLogin = (provider: string): void => {
     alert(`Initiating ${provider} OAuth authentication...`);
   };
 
