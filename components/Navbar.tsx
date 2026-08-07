@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Icon from './Icons.jsx';
+import Icon from './Icons';
 
 export default function Navbar() {
   return (

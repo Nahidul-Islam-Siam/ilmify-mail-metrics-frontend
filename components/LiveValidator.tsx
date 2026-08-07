@@ -3,7 +3,7 @@ import { useEffect, useCallback, useRef, type RefObject } from 'react';
 import { validateEmailThunk, setLastEmail } from '../store/validationSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import type { ValidationStatus } from '../types/validation';
-import ScoreRing from './ScoreRing.jsx';
+import ScoreRing from './ScoreRing';
 
 const COL = { ok: '#8CF0B0', bad: '#ff9a9a', warn: '#ffd479' };
 

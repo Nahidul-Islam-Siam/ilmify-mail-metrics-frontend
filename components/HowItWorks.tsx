@@ -1,6 +1,6 @@
-import Icon from './Icons.jsx';
-import SectionHead from './SectionHead.jsx';
-import { steps } from '../data/content.js';
+import Icon from './Icons';
+import SectionHead from './SectionHead';
+import { steps } from '../data/content';
 
 export default function HowItWorks() {
   return (

@@ -1,6 +1,6 @@
-import Icon from './Icons.jsx';
-import SectionHead from './SectionHead.jsx';
-import { features } from '../data/content.js';
+import Icon from './Icons';
+import SectionHead from './SectionHead';
+import { features } from '../data/content';
 
 export default function Features() {
   return (

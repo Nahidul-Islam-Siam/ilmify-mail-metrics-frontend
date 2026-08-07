@@ -1,6 +1,6 @@
 'use client';
-import Icon from './Icons.jsx';
-import { useToast } from './ToastProvider.jsx';
+import Icon from './Icons';
+import { useToast } from './ToastProvider';
 
 export default function CtaBand() {
   const onToast = useToast();

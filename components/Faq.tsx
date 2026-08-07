@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import Icon from './Icons.jsx';
-import SectionHead from './SectionHead.jsx';
-import { faqs } from '../data/content.js';
+import Icon from './Icons';
+import SectionHead from './SectionHead';
+import { faqs } from '../data/content';
 
 export default function Faq() {
   const [open, setOpen] = useState<number | null>(null);

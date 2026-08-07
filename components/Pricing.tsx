@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { useToast } from './ToastProvider.jsx';
-import Icon from './Icons.jsx';
-import SectionHead from './SectionHead.jsx';
-import { plans } from '../data/content.js';
+import { useToast } from './ToastProvider';
+import Icon from './Icons';
+import SectionHead from './SectionHead';
+import { plans } from '../data/content';
 
 export default function Pricing() {
   const onToast = useToast();

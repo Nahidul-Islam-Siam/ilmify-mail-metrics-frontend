@@ -1,6 +1,6 @@
 import './globals.css';
-import StoreProvider from '../components/StoreProvider.jsx';
-import { PermissionProvider } from '../context/PermissionContext.jsx';
+import StoreProvider from '../components/StoreProvider';
+import { PermissionProvider } from '../context/PermissionContext';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 

@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useRef, useCallback } from 'react';
-import Toast from './Toast.jsx';
+import Toast from './Toast';
 import type { ChildrenProps } from '../types/rbac';
 import type { ToastFunction } from '../types/ui';
 

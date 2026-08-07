@@ -1,9 +1,9 @@
 'use client';
 import { useRef, Fragment } from 'react';
-import Icon from './Icons.jsx';
-import Navbar from './Navbar.jsx';
-import LiveValidator from './LiveValidator.jsx';
-import { stats } from '../data/content.js';
+import Icon from './Icons';
+import Navbar from './Navbar';
+import LiveValidator from './LiveValidator';
+import { stats } from '../data/content';
 
 export default function Hero() {
   const emailRef = useRef<HTMLInputElement>(null);
