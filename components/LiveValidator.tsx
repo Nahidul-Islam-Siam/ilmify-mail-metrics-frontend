@@ -1,19 +1,20 @@
 'use client';
-import { useEffect, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useCallback, useRef, type RefObject } from 'react';
 import { validateEmailThunk, setLastEmail } from '../store/validationSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import type { ValidationStatus } from '../types/validation';
 import ScoreRing from './ScoreRing.jsx';
 
 const COL = { ok: '#8CF0B0', bad: '#ff9a9a', warn: '#ffd479' };
 
-const VERDICT = {
+const VERDICT: Record<ValidationStatus, readonly [string, string, string]> = {
   valid:      ['Safe to send', '#22C55E', 'rgba(34,197,94,.16)'],
   risky:      ['Verify first', '#F59E0B', 'rgba(245,158,11,.16)'],
   disposable: ['Block it',     '#EF4444', 'rgba(239,68,68,.16)'],
   invalid:    ['Do not send',  '#EF4444', 'rgba(239,68,68,.16)'],
 };
 
-function CheckRow({ state, label }) {
+function CheckRow({ state, label }: { state: boolean | 'skip'; label: string }) {
   const c = state === true ? COL.ok : state === 'skip' ? COL.warn : COL.bad;
   return (
     <span>
@@ -27,10 +28,10 @@ function CheckRow({ state, label }) {
   );
 }
 
-export default function LiveValidator({ inputRef }) {
-  const dispatch = useDispatch();
-  const { lastEmail: email, lastResult: result, busy } = useSelector((state) => state.validation);
-  const localRef = useRef(null);
+export default function LiveValidator({ inputRef }: { inputRef?: RefObject<HTMLInputElement> }) {
+  const dispatch = useAppDispatch();
+  const { lastEmail: email, lastResult: result, busy } = useAppSelector((state) => state.validation);
+  const localRef = useRef<HTMLInputElement>(null);
   const ref = inputRef || localRef;
 
   const run = useCallback(() => {
@@ -46,7 +47,7 @@ export default function LiveValidator({ inputRef }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const verdict = result ? (VERDICT[result.status] || VERDICT.valid) : null;
+  const verdict = VERDICT[result?.status ?? 'valid'];
   const mx = result?.checks?.mx;
 
   return (

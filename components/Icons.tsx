@@ -1,4 +1,11 @@
-const P = { fill: 'none', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
+import type { SVGProps } from 'react';
+
+const P: Pick<SVGProps<SVGPathElement>, 'fill' | 'strokeWidth' | 'strokeLinecap' | 'strokeLinejoin'> = {
+  fill: 'none',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+};
 
 export const paths = {
   bolt:   <path d="M13 3L5 13h6l-1 8 8-11h-6z" stroke="currentColor" {...P} />,
@@ -17,7 +24,12 @@ export const paths = {
   logo:   <><path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" strokeWidth="2" /></>,
 };
 
-export default function Icon({ name, className }) {
+interface IconProps {
+  name: keyof typeof paths;
+  className?: string;
+}
+
+export default function Icon({ name, className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
       {paths[name]}

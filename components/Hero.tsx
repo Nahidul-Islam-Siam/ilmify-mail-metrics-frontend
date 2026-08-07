@@ -6,7 +6,7 @@ import LiveValidator from './LiveValidator.jsx';
 import { stats } from '../data/content.js';
 
 export default function Hero() {
-  const emailRef = useRef(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   const focusDemo = () => {
     emailRef.current?.focus();

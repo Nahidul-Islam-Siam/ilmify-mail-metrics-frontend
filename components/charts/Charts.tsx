@@ -1,6 +1,13 @@
 import React from 'react';
+import type { ChartDatum, DonutSegment } from '../../types/ui';
 
-export function BarChart({ data, opts = {} }) {
+interface ChartOptions { w?: number; h?: number }
+interface ChartProps { data: ChartDatum[]; opts?: ChartOptions }
+interface DonutOptions { size?: number; big?: string | number; label?: string }
+interface DonutProps { segments: DonutSegment[]; opts?: DonutOptions }
+interface RingProps { pct: number; opts?: { size?: number } }
+
+export function BarChart({ data, opts = {} }: ChartProps) {
   const w = opts.w || 560;
   const h = opts.h || 220;
   const pad = 28;
@@ -50,7 +57,7 @@ export function BarChart({ data, opts = {} }) {
   );
 }
 
-export function AreaChart({ data, opts = {} }) {
+export function AreaChart({ data, opts = {} }: ChartProps) {
   const w = opts.w || 560;
   const h = opts.h || 220;
   const pad = 28;
@@ -61,7 +68,7 @@ export function AreaChart({ data, opts = {} }) {
   const min = 0;
   
   const step = (w - pad * 2) / (data.length - 1);
-  const pts = data.map((d, i) => [pad + step * i, h - pad - ((h - pad * 1.4) * ((d.v - min) / (max - min)))]);
+  const pts: Array<[number, number]> = data.map((d, i) => [pad + step * i, h - pad - ((h - pad * 1.4) * ((d.v - min) / (max - min)))]);
 
   const gridLines = [];
   for (let i = 1; i <= 4; i++) {
@@ -97,7 +104,7 @@ export function AreaChart({ data, opts = {} }) {
   );
 }
 
-export function DonutChart({ segments, opts = {} }) {
+export function DonutChart({ segments, opts = {} }: DonutProps) {
   const size = opts.size || 168;
   const r = 62;
   const cx = size / 2;
@@ -138,7 +145,7 @@ export function DonutChart({ segments, opts = {} }) {
   );
 }
 
-export function Ring({ pct, opts = {} }) {
+export function Ring({ pct, opts = {} }: RingProps) {
   const size = opts.size || 172;
   const r = 74;
   const cx = size / 2;

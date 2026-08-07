@@ -5,7 +5,7 @@ import SectionHead from './SectionHead.jsx';
 import { faqs } from '../data/content.js';
 
 export default function Faq() {
-  const [open, setOpen] = useState(null);
+  const [open, setOpen] = useState<number | null>(null);
   return (
     <section className="faq" id="faq">
       <div className="wrap">

@@ -1,4 +1,10 @@
-export const features = [
+type ContentIcon = 'bolt' | 'shield' | 'gauge' | 'upload' | 'export' | 'sheet' | 'trap' | 'code' | 'users';
+interface Feature { icon: ContentIcon; title: string; desc: string; featured?: boolean }
+interface Step { icon: ContentIcon; title: string; desc: string }
+interface Statistic { value: string; label: string }
+interface Plan { name: string; monthly: number; yearly: number; desc: string; features: string[]; cta: string; variant: string; popular?: boolean }
+
+export const features: Feature[] = [
   { icon: 'bolt',   title: 'Real-time verification', desc: 'Format, domain, and live MX checks the moment an address is entered.', featured: true },
   { icon: 'shield', title: 'Disposable detection',   desc: 'Block temporary and throwaway inboxes before they reach your list.' },
   { icon: 'gauge',  title: 'AI quality score',       desc: 'Every address gets a 0–100 score, so you know exactly what is safe to send.' },
@@ -9,21 +15,21 @@ export const features = [
   { icon: 'users',  title: 'Team roles & logs',      desc: 'Invite your team as Admin, Manager, or Viewer with full activity logs.' },
 ];
 
-export const steps = [
+export const steps: Step[] = [
   { icon: 'upload', title: 'Add your emails',     desc: 'Check one address, upload a CSV or Excel file, or connect a Google Sheet.' },
   { icon: 'bolt',   title: 'AI runs 200+ checks', desc: 'Format, domain, MX, disposable, spam-traps and reputation — all in real time.' },
   { icon: 'gauge',  title: 'Get scored results',  desc: 'Each address returns a status and a 0–100 quality score you can trust.' },
   { icon: 'export', title: 'Export or sync',      desc: 'Download the clean list or auto-sync valid emails back to your sheet or CRM.' },
 ];
 
-export const stats = [
+export const stats: Statistic[] = [
   { value: '2.4M+',  label: 'Emails validated' },
   { value: '99.2%',  label: 'Accuracy rate' },
   { value: '8,000+', label: 'Senders trust us' },
   { value: '142ms',  label: 'Avg. response' },
 ];
 
-export const plans = [
+export const plans: Plan[] = [
   { name: 'Free', monthly: 0, yearly: 0, desc: 'For trying MailMetric on a small list.',
     features: ['100 validations / month', 'Single email checker', 'Basic quality score', 'Community support'],
     cta: 'Start free', variant: 'ghost' },
@@ -35,7 +41,7 @@ export const plans = [
     cta: 'Choose Business', variant: 'white' },
 ];
 
-export const faqs = [
+export const faqs: Array<readonly [string, string]> = [
   ['How does MailMetric verify an email?',
    'We run layered checks — syntax, domain and live MX records, disposable-domain matching, and blacklist and spam-trap lookups — then combine them into a 0–100 AI quality score, all in real time.'],
   ['Will checking emails hurt my sender reputation?',

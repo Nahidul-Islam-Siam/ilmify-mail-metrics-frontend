@@ -1,5 +1,5 @@
 export type ValidationStatus = 'valid' | 'invalid' | 'disposable' | 'risky';
-export type ValidationCheckState = 'pass' | 'fail' | 'warn' | 'unknown';
+export type ValidationCheckState = 'pass' | 'fail' | 'warn' | 'unknown' | 'skipped';
 
 export interface ValidationChecks {
   format: ValidationCheckState;

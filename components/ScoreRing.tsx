@@ -1,4 +1,4 @@
-export default function ScoreRing({ score = 0 }) {
+export default function ScoreRing({ score = 0 }: { score?: number }) {
   const r = 42;
   const C = 2 * Math.PI * r;
   const len = (C * score) / 100;
