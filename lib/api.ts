@@ -6,7 +6,7 @@ const DISPOSABLE = ['tempmail.io','temp-mail.org','mailinator.com','10minutemail
 const ROLE = ['info','admin','support','noreply','no-reply','contact','sales','office','billing','hello'];
 
 // Offline fallback so the demo still works if the backend is unreachable.
-export function localValidate(v) {
+export function localValidate(v: string): ValidationResult {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const fmtOk = re.test(v);
   const domain = v.split('@')[1] || '';
@@ -26,7 +26,26 @@ export function localValidate(v) {
     checks: { format: fmtOk ? 'pass' : 'fail', mx: (fmtOk && hasDot) ? 'pass' : 'fail' } };
 }
 
-export async function validateEmail(email) {
+function isValidationResult(value: unknown): value is ValidationResult {
+  if (!value || typeof value !== 'object') return false;
+  const result = value as Record<string, unknown>;
+  const checks = result.checks;
+  const statuses: ValidationStatus[] = ['valid', 'invalid', 'disposable', 'risky'];
+  const checkStates: ValidationCheckState[] = ['pass', 'fail', 'warn', 'unknown'];
+
+  return typeof result.score === 'number'
+    && typeof result.status === 'string'
+    && statuses.includes(result.status as ValidationStatus)
+    && typeof result.disposable === 'boolean'
+    && !!checks
+    && typeof checks === 'object'
+    && typeof (checks as Record<string, unknown>).format === 'string'
+    && checkStates.includes((checks as Record<string, unknown>).format as ValidationCheckState)
+    && typeof (checks as Record<string, unknown>).mx === 'string'
+    && checkStates.includes((checks as Record<string, unknown>).mx as ValidationCheckState);
+}
+
+export async function validateEmail(email: string): Promise<ValidationResult> {
   const v = (email || '').trim().toLowerCase();
   try {
     const res = await fetch(`${API_BASE}/api/validate`, {
@@ -35,9 +54,11 @@ export async function validateEmail(email) {
       body: JSON.stringify({ email: v }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data: unknown = await res.json();
+    if (!isValidationResult(data)) throw new Error('Invalid validation response');
     return { ...data, live: true };
   } catch {
     return localValidate(v);
   }
 }
+import type { ValidationCheckState, ValidationResult, ValidationStatus } from '../types/validation';

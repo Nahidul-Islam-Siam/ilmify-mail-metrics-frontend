@@ -1,12 +1,38 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import type {
+  AuthResult,
+  ChildrenProps,
+  CreatableRole,
+  PermissionContextValue,
+  PermissionDefinition,
+  PermissionName,
+  RbacUser,
+  RoleName,
+} from '../types/rbac';
 
-const PermissionContext = createContext(null);
+const PermissionContext = createContext<PermissionContextValue | null>(null);
 
-export function PermissionProvider({ children }) {
-  const [token, setToken] = useState(null);
-  const [user, setUser] = useState({
+function isRbacUser(value: unknown): value is RbacUser {
+  if (!value || typeof value !== 'object') return false;
+  const user = value as Record<string, unknown>;
+  return typeof user.id === 'string'
+    && typeof user.name === 'string'
+    && typeof user.email === 'string'
+    && typeof user.role === 'string'
+    && typeof user.role_id === 'string'
+    && Array.isArray(user.permissions)
+    && user.permissions.every((permission) => typeof permission === 'string');
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' ? value as Record<string, unknown> : null;
+}
+
+export function PermissionProvider({ children }: ChildrenProps) {
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<RbacUser | null>({
     id: 'usr-super-admin-1',
     name: 'Super Admin',
     email: 'superadmin@mailmetric.io',
@@ -19,7 +45,7 @@ export function PermissionProvider({ children }) {
     ]
   });
 
-  const [availablePermissions, setAvailablePermissions] = useState([
+  const [availablePermissions] = useState<PermissionDefinition[]>([
     { id: 'perm-user-create', name: 'user.create', module: 'User Management', label: 'Create User' },
     { id: 'perm-user-view', name: 'user.view', module: 'User Management', label: 'View Users' },
     { id: 'perm-user-edit', name: 'user.edit', module: 'User Management', label: 'Edit User' },
@@ -46,21 +72,22 @@ export function PermissionProvider({ children }) {
     }
   }, []);
 
-  const fetchProfile = async (authToken) => {
+  const fetchProfile = async (authToken: string): Promise<void> => {
     try {
       const res = await fetch('http://localhost:4000/api/auth/me', {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
+        const data: unknown = await res.json();
+        const record = asRecord(data);
+        if (record && isRbacUser(record.user)) setUser(record.user);
       }
     } catch (err) {
       console.warn('API sync fallback: Using client RBAC state.');
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     setLoading(true);
     try {
       const res = await fetch('http://localhost:4000/api/auth/login', {
@@ -68,18 +95,22 @@ export function PermissionProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
-      if (res.ok) {
-        setToken(data.token);
-        setUser(data.user);
+      const data: unknown = await res.json();
+      const record = asRecord(data);
+      if (res.ok && record && typeof record.token === 'string' && isRbacUser(record.user)) {
+        setToken(record.token);
+        setUser(record.user);
         if (typeof window !== 'undefined') {
-          localStorage.setItem('mm_token', data.token);
+          localStorage.setItem('mm_token', record.token);
         }
         setLoading(false);
         return { success: true };
       } else {
         setLoading(false);
-        return { success: false, error: data.message };
+        return {
+          success: false,
+          error: record && typeof record.message === 'string' ? record.message : 'Login failed.',
+        };
       }
     } catch (err) {
       setLoading(false);
@@ -95,8 +126,8 @@ export function PermissionProvider({ children }) {
   };
 
   // Demo Role Switcher for instant UI evaluation
-  const switchRoleDemo = (roleName) => {
-    let perms = [];
+  const switchRoleDemo = (roleName: RoleName): void => {
+    let perms: PermissionName[] = [];
     switch (roleName) {
       case 'Super Admin':
         perms = availablePermissions.map(p => p.name);
@@ -152,20 +183,21 @@ export function PermissionProvider({ children }) {
   };
 
   // Permission Check Helper
-  const hasPermission = (permissionName) => {
+  const hasPermission = (permissionName: PermissionName): boolean => {
     if (!user) return false;
     if (user.role === 'Super Admin') return true;
     return user.permissions?.includes(permissionName) || false;
   };
 
   // Role Hierarchy Creation Checker
-  const canCreateRole = (targetRoleName) => {
+  const canCreateRole = (targetRoleName: RoleName): boolean => {
     if (!user) return false;
-    const rankMap = {
+    const rankMap: Record<RoleName, number> = {
       'Super Admin': 4,
       'Admin': 3,
       'User': 2,
-      'Sub User': 1
+      'Sub User': 1,
+      'Guest': 0,
     };
     if (user.role === 'Super Admin') return true;
     const myRank = rankMap[user.role] || 0;
@@ -174,7 +206,7 @@ export function PermissionProvider({ children }) {
   };
 
   // Allowed target roles array based on logged-in user
-  const getAllowedRolesToCreate = () => {
+  const getAllowedRolesToCreate = (): CreatableRole[] => {
     if (!user) return [];
     if (user.role === 'Super Admin') return ['Admin', 'User', 'Sub User'];
     if (user.role === 'Admin') return ['User', 'Sub User'];
@@ -182,8 +214,8 @@ export function PermissionProvider({ children }) {
     return [];
   };
 
-  const updateUser = (updatedFields) => {
-    setUser((prev) => (prev ? { ...prev, ...updatedFields } : updatedFields));
+  const updateUser = (updatedFields: Partial<RbacUser>): void => {
+    setUser((prev) => (prev ? { ...prev, ...updatedFields } : null));
   };
 
   return (
