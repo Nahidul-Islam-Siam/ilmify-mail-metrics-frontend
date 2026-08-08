@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import CheckResultCard from '../../../../components/email-validation/CheckResultCard';
 import StatusBadge from '../../../../components/email-validation/StatusBadge';
 import ProtectedRoute from '../../../../components/rbac/ProtectedRoute';
-import { validateSingleEmail } from '../../../../lib/api';
+import { validateSingleEmail } from '@/services/api/validationApi';
 import type { EmailValidationResult } from '../../../../types/validation';
 
 const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {

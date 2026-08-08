@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { parseAuthSession } from './auth-api';
+import { parseAuthSession } from './authApi';
 
 describe('auth API boundary', () => {
   it('parses a complete backend auth session and normalizes its role', () => {

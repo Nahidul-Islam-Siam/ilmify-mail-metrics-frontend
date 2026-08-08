@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildApiUrl } from './api-url';
+import { buildApiUrl } from './apiUrl';
 
 test('buildApiUrl joins the public backend base URL with an API path', () => {
   assert.equal(

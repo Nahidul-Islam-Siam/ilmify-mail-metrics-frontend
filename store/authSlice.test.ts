@@ -8,7 +8,7 @@ import authReducer, {
   selectRestorableTokens,
   type AuthState,
 } from './authSlice';
-import type { AuthSession, AuthTokens } from '../lib/auth-api';
+import type { AuthSession, AuthTokens } from '@/services/api/authApi';
 
 const session: AuthSession = {
   accessToken: 'access-1',

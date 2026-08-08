@@ -2,7 +2,7 @@
 
 import { useRef, useState, type ChangeEvent } from 'react';
 import StatusBadge from '../../../../components/email-validation/StatusBadge';
-import { validateBulkEmails } from '../../../../lib/api';
+import { validateBulkEmails } from '@/services/api/validationApi';
 import type { BulkValidationResult, EmailValidationResult } from '../../../../types/validation';
 
 type ProcessingState = 'idle' | 'processing' | 'complete' | 'error';

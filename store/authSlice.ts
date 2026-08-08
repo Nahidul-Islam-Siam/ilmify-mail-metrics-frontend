@@ -7,7 +7,7 @@ import {
   refreshRequest,
   type AuthSession,
   type AuthTokens,
-} from '../lib/auth-api';
+} from '@/services/api/authApi';
 import type { RbacUser } from '../types/rbac';
 
 export interface AuthState {

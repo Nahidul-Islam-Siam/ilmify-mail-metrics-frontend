@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { validateEmail } from '../lib/api';
+import { validateEmail } from '@/services/api/validationApi';
 import type { EmailValidationResult } from '../types/validation';
 
 interface ValidationState {
