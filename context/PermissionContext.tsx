@@ -19,6 +19,7 @@ import type {
   PermissionContextValue,
   PermissionDefinition,
   PermissionName,
+  RbacUser,
   RoleName,
 } from '../types/rbac';
 
