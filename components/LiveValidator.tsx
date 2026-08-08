@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useCallback, useRef, type RefObject } from 'react';
-import { validateEmailThunk, setLastEmail } from '../store/validationSlice';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { validateEmailThunk, setLastEmail } from '@/redux/features/validation/validationSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import type { ValidationStatus } from '../types/validation';
 import ScoreRing from './ScoreRing';
 

@@ -9,8 +9,8 @@ import {
   logoutThunk,
   selectRestorableTokens,
   updateUser,
-} from '../store/authSlice';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+} from '@/redux/features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import type {
   PermissionContextValue,
   PermissionDefinition,

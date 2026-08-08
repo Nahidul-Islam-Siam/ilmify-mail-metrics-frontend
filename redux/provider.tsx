@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import {
   markInitialized,
   restoreSessionThunk,
   selectRestorableTokens,
-} from '../store/authSlice';
-import { makeStore } from '../store/store';
-import type { ChildrenProps } from '../types/rbac';
+} from '@/redux/features/auth/authSlice';
+import { makeStore } from '@/redux/store';
+import type { ChildrenProps } from '@/types/rbac';
 
 function AuthBootstrap({ children }: ChildrenProps) {
   const dispatch = useAppDispatch();
@@ -31,7 +31,7 @@ function AuthBootstrap({ children }: ChildrenProps) {
   return children;
 }
 
-export default function StoreProvider({ children }: ChildrenProps) {
+export default function ReduxProvider({ children }: ChildrenProps) {
   const [store] = useState(makeStore);
   const [persistor] = useState(() => persistStore(store));
 

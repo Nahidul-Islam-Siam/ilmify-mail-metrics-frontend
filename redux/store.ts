@@ -8,9 +8,9 @@ import {
   REHYDRATE,
   persistReducer,
 } from 'redux-persist';
-import authReducer from './authSlice';
-import { authPersistConfig } from './authPersist';
-import validationReducer from './validationSlice';
+import authReducer from './features/auth/authSlice';
+import { authPersistConfig } from './features/auth/authPersist';
+import validationReducer from './features/validation/validationSlice';
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 

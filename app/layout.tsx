@@ -1,5 +1,5 @@
 import './globals.css';
-import StoreProvider from '../components/StoreProvider';
+import ReduxProvider from '@/redux/provider';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
@@ -24,9 +24,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         />
       </head>
       <body>
-        <StoreProvider>
+        <ReduxProvider>
           {children}
-        </StoreProvider>
+        </ReduxProvider>
       </body>
     </html>
   );
