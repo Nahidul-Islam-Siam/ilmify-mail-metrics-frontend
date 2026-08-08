@@ -3,8 +3,8 @@ import type {
   EmailValidationResult,
   ValidationStatus,
 } from '../types/validation';
+import { buildApiUrl } from './api-url';
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/+$/, '');
 const STATUSES: ValidationStatus[] = ['valid', 'invalid', 'risky', 'unknown'];
 
 function isEmailValidationResult(value: unknown): value is EmailValidationResult {
@@ -27,7 +27,7 @@ export async function validateSingleEmail(
   email: string,
   smtp = true,
 ): Promise<EmailValidationResult> {
-  const response = await fetch(`${API_BASE}/api/validation/single`, {
+  const response = await fetch(buildApiUrl('/api/validation/single'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email.trim().toLowerCase(), smtp }),
@@ -43,7 +43,7 @@ export const validateEmail = validateSingleEmail;
 export async function validateBulkEmails(
   emails: string[],
 ): Promise<BulkValidationResult> {
-  const response = await fetch(`${API_BASE}/api/validation/bulk`, {
+  const response = await fetch(buildApiUrl('/api/validation/bulk'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ emails }),
