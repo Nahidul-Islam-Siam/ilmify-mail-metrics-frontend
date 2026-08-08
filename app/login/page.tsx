@@ -1,11 +1,24 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { usePermission } from '../../hooks/usePermission';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const { login, loading } = usePermission();
+  const router = useRouter();
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    const result = await login(email, password);
+    if (result.success) router.replace(result.destination);
+    else setError(result.error);
+  };
 
   const handleSocialLogin = (provider: string): void => {
     alert(`Initiating ${provider} OAuth authentication...`);
@@ -145,7 +158,7 @@ export default function LoginPage() {
         </div>
 
         {/* Email & Password Form */}
-        <form onSubmit={(e) => { e.preventDefault(); window.location.href = '/dashboard'; }}>
+        <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: '#CBD5E1' }}>
               Work Email
@@ -193,7 +206,8 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" style={{
+          {error && <p role="alert" style={{ color: '#FCA5A5', fontSize: 12 }}>{error}</p>}
+          <button type="submit" disabled={loading} style={{
             width: '100%',
             padding: '12px',
             background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
@@ -205,7 +219,7 @@ export default function LoginPage() {
             cursor: 'pointer',
             boxShadow: '0 4px 12px rgba(99, 102, 241, 0.35)'
           }}>
-            Sign in
+            {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 

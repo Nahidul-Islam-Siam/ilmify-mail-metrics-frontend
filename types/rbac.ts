@@ -22,7 +22,7 @@ export interface RbacUser {
 }
 
 export type AuthResult =
-  | { success: true }
+  | { success: true; destination: '/super-admin' | '/dashboard' }
   | { success: false; error: string };
 
 export interface PermissionContextValue {
@@ -37,7 +37,6 @@ export interface PermissionContextValue {
   getAllowedRolesToCreate(): CreatableRole[];
   login(email: string, password: string): Promise<AuthResult>;
   logout(): void;
-  switchRoleDemo(role: RoleName): void;
   updateUser(fields: Partial<RbacUser>): void;
 }
 

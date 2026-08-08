@@ -3,10 +3,10 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePermission } from '../../hooks/usePermission';
-import type { RoleName, UserRole } from '../../types/rbac';
+import type { RoleName } from '../../types/rbac';
 
 export default function Topbar({ onMenuClick }: { onMenuClick(): void }) {
-  const { user, role, switchRoleDemo } = usePermission();
+  const { user, role } = usePermission();
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -79,31 +79,8 @@ export default function Topbar({ onMenuClick }: { onMenuClick(): void }) {
         />
       </div>
 
-      {/* Right Controls: Role Demo Switcher & User Profile */}
+      {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        
-        {/* Role Demo Switcher Pill */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '4px', background: '#F8FAFC',
-          border: '1px solid #E4E7EC', padding: '3px 4px', borderRadius: '20px'
-        }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#98A2B3', padding: '0 8px' }}>Test Role:</span>
-          {(['Super Admin', 'Admin', 'User', 'Sub User'] satisfies UserRole[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => switchRoleDemo(r)}
-              style={{
-                padding: '4px 10px', borderRadius: '14px', fontSize: '11px', fontWeight: 700,
-                border: 'none', cursor: 'pointer', transition: 'all 0.2s ease',
-                background: role === r ? '#7C3AED' : 'transparent',
-                color: role === r ? '#FFFFFF' : '#64748B'
-              }}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-
         {/* User Credits Badge */}
         <div className="credits-badge" style={{
           background: '#F3E8FF',
