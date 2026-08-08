@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
-import Sidebar from './Sidebar';
-import Topbar from './Topbar';
+import Sidebar from '@/components/dashboard/Sidebar';
+import Topbar from '@/components/dashboard/Topbar';
 import type { ChildrenProps } from '@/features/auth/types';
-import AuthenticatedRoute from '../rbac/AuthenticatedRoute';
+import AuthenticatedRoute from '@/components/rbac/AuthenticatedRoute';
 
-export default function DashboardShell({ children }: ChildrenProps) {
+export default function DashboardLayout({ children }: ChildrenProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return <AuthenticatedRoute>

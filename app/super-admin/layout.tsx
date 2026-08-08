@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import SuperAdminShell from '../../components/super-admin/SuperAdminShell';
+import SuperAdminLayoutShell from '@/components/layouts/SuperAdminLayout';
 
 export default function SuperAdminLayout({ children }: { children: ReactNode }) {
-  return <SuperAdminShell>{children}</SuperAdminShell>;
+  return <SuperAdminLayoutShell>{children}</SuperAdminLayoutShell>;
 }
