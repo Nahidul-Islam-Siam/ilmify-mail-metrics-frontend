@@ -3,11 +3,12 @@ import { useState } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import type { ChildrenProps } from '../../types/rbac';
+import AuthenticatedRoute from '../rbac/AuthenticatedRoute';
 
 export default function DashboardShell({ children }: ChildrenProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  return (
+  return <AuthenticatedRoute>
     <div style={{
       display: 'flex',
       minHeight: '100vh',
@@ -38,5 +39,5 @@ export default function DashboardShell({ children }: ChildrenProps) {
         </main>
       </div>
     </div>
-  );
+  </AuthenticatedRoute>;
 }
