@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { usePermission } from '../../hooks/usePermission';
 import type { RoleName } from '../../types/rbac';
 
 export default function Topbar({ onMenuClick }: { onMenuClick(): void }) {
-  const { user, role } = usePermission();
+  const { user, role, logout } = usePermission();
+  const router = useRouter();
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -96,6 +98,10 @@ export default function Topbar({ onMenuClick }: { onMenuClick(): void }) {
           <span>41.2k</span>
           <span style={{ opacity: 0.7, fontWeight: 500 }}>Credits</span>
         </div>
+
+        <button type="button" onClick={async () => { await logout(); router.replace('/login'); }} style={{ border: '1px solid #E4E7EC', background: '#fff', color: '#475467', borderRadius: 8, padding: '7px 11px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+          Logout
+        </button>
 
         {/* User Profile Info */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

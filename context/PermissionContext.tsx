@@ -1,7 +1,17 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getDefaultDashboard, normalizeRole } from '../lib/auth-routing';
+import { getDefaultDashboard } from '../lib/auth-routing';
+import {
+  AuthApiError,
+  clearStoredTokens,
+  loginRequest,
+  logoutRequest,
+  profileRequest,
+  readStoredTokens,
+  refreshRequest,
+  storeTokens,
+} from '../lib/auth-api';
 import type {
   AuthResult,
   ChildrenProps,
@@ -9,39 +19,10 @@ import type {
   PermissionContextValue,
   PermissionDefinition,
   PermissionName,
-  RbacUser,
   RoleName,
 } from '../types/rbac';
 
 const PermissionContext = createContext<PermissionContextValue | null>(null);
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === 'object'
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function parseUser(value: unknown): RbacUser | null {
-  const record = asRecord(value);
-  if (!record) return null;
-  const role = normalizeRole(record.role);
-  const id = record.id ?? record._id ?? record.sub;
-  const name = record.name ?? record.fullName ?? record.companyName;
-  if (!role || typeof id !== 'string' || typeof record.email !== 'string') {
-    return null;
-  }
-  const permissions = Array.isArray(record.permissions)
-    ? record.permissions.filter((item): item is string => typeof item === 'string')
-    : [];
-  return {
-    id,
-    name: typeof name === 'string' && name ? name : record.email,
-    email: record.email,
-    role,
-    role_id: typeof record.role_id === 'string' ? record.role_id : role.toLowerCase().replaceAll(' ', '_'),
-    permissions,
-  };
-}
 
 const AVAILABLE_PERMISSIONS: PermissionDefinition[] = [
   { id: 'perm-user-create', name: 'user.create', module: 'User Management', label: 'Create User' },
@@ -59,61 +40,53 @@ export function PermissionProvider({ children }: ChildrenProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('mm_token');
-    if (!storedToken) {
+    const storedTokens = readStoredTokens(localStorage);
+    if (!storedTokens) {
       setLoading(false);
       return;
     }
-    setToken(storedToken);
-    void fetch('/api/auth/me', {
-      headers: { Authorization: `Bearer ${storedToken}` },
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error('Session expired');
-        const body: unknown = await response.json();
-        const record = asRecord(body);
-        const profile = parseUser(record?.user ?? body);
-        if (!profile) throw new Error('Invalid profile');
-        setUser(profile);
-      })
-      .catch(() => {
-        localStorage.removeItem('mm_token');
-        setToken(null);
-        setUser(null);
-      })
-      .finally(() => setLoading(false));
+    setToken(storedTokens.accessToken);
+    void (async () => {
+      try {
+        setUser(await profileRequest(storedTokens.accessToken));
+      } catch (error) {
+        if (!(error instanceof AuthApiError) || error.status !== 401) throw error;
+        const refreshed = await refreshRequest(storedTokens.refreshToken);
+        storeTokens(localStorage, refreshed);
+        setToken(refreshed.accessToken);
+        setUser(refreshed.user);
+      }
+    })().catch(() => {
+      clearStoredTokens(localStorage);
+      setToken(null);
+      setUser(null);
+    }).finally(() => setLoading(false));
   }, []);
 
   async function login(email: string, password: string): Promise<AuthResult> {
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const body: unknown = await response.json();
-      const record = asRecord(body);
-      const authToken = record?.token ?? record?.accessToken;
-      const profile = parseUser(record?.user);
-      if (!response.ok || typeof authToken !== 'string' || !profile) {
-        return { success: false, error: typeof record?.message === 'string' ? record.message : 'Login failed.' };
-      }
-      localStorage.setItem('mm_token', authToken);
-      setToken(authToken);
-      setUser(profile);
-      return { success: true, destination: getDefaultDashboard(profile.role) };
-    } catch {
-      return { success: false, error: 'Cannot connect to authentication backend server.' };
+      const session = await loginRequest(email, password);
+      storeTokens(localStorage, session);
+      setToken(session.accessToken);
+      setUser(session.user);
+      return { success: true, destination: getDefaultDashboard(session.user.role) };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Cannot connect to authentication backend server.' };
     } finally {
       setLoading(false);
     }
   }
 
-  function logout(): void {
-    localStorage.removeItem('mm_token');
-    setToken(null);
-    setUser(null);
+  async function logout(): Promise<void> {
+    const storedTokens = readStoredTokens(localStorage);
+    try {
+      if (storedTokens) await logoutRequest(storedTokens);
+    } finally {
+      clearStoredTokens(localStorage);
+      setToken(null);
+      setUser(null);
+    }
   }
 
   function hasPermission(permission: PermissionName): boolean {
