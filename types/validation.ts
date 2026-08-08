@@ -1,17 +1,29 @@
-export type ValidationStatus = 'valid' | 'invalid' | 'disposable' | 'risky';
+export type ValidationStatus = 'valid' | 'invalid' | 'risky' | 'unknown';
 export type ValidationCheckState = 'pass' | 'fail' | 'warn' | 'unknown' | 'skipped';
 
-export interface ValidationChecks {
-  format: ValidationCheckState;
-  mx: ValidationCheckState;
-  [check: string]: ValidationCheckState;
+export interface EmailValidationResult {
+  email: string;
+  normalizedEmail: string;
+  status: ValidationStatus;
+  score: number;
+  checks: {
+    syntax: 'pass' | 'fail';
+    dns: 'pass' | 'fail' | 'unknown';
+    mx: 'pass' | 'fail' | 'unknown';
+    disposable: 'pass' | 'fail';
+    roleAccount: 'pass' | 'warn';
+    smtp: 'pass' | 'fail' | 'unknown' | 'skipped';
+  };
+  reasons: string[];
+  checkedAt: string;
 }
 
-export interface ValidationResult {
-  score: number;
-  status: ValidationStatus;
-  disposable: boolean;
-  live: boolean;
-  checks: ValidationChecks;
-  [field: string]: unknown;
+export interface BulkValidationResult {
+  total: number;
+  processed: number;
+  valid: number;
+  invalid: number;
+  risky: number;
+  unknown: number;
+  results: EmailValidationResult[];
 }

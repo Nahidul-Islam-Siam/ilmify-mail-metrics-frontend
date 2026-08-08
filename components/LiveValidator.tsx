@@ -10,8 +10,8 @@ const COL = { ok: '#8CF0B0', bad: '#ff9a9a', warn: '#ffd479' };
 const VERDICT: Record<ValidationStatus, readonly [string, string, string]> = {
   valid:      ['Safe to send', '#22C55E', 'rgba(34,197,94,.16)'],
   risky:      ['Verify first', '#F59E0B', 'rgba(245,158,11,.16)'],
-  disposable: ['Block it',     '#EF4444', 'rgba(239,68,68,.16)'],
   invalid:    ['Do not send',  '#EF4444', 'rgba(239,68,68,.16)'],
+  unknown:    ['Try again',     '#F59E0B', 'rgba(245,158,11,.16)'],
 };
 
 function CheckRow({ state, label }: { state: boolean | 'skip'; label: string }) {
@@ -79,9 +79,9 @@ export default function LiveValidator({ inputRef }: { inputRef?: RefObject<HTMLI
                 {result.status.charAt(0).toUpperCase() + result.status.slice(1)}
               </span>
               <div className="vlist">
-                <CheckRow state={result.checks.format === 'pass'} label="Format & syntax" />
-                <CheckRow state={mx === 'pass' ? true : mx === 'skipped' ? 'skip' : false} label="Domain & MX" />
-                <CheckRow state={!result.disposable} label="Not disposable" />
+                <CheckRow state={result.checks.syntax === 'pass'} label="Format & syntax" />
+                <CheckRow state={mx === 'pass' ? true : mx === 'unknown' ? 'skip' : false} label="Domain & MX" />
+                <CheckRow state={result.checks.disposable === 'pass'} label="Not disposable" />
               </div>
             </div>
           </>

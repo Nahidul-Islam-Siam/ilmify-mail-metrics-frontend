@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import { validateEmail } from '../lib/api';
-import type { ValidationResult } from '../types/validation';
+import type { EmailValidationResult } from '../types/validation';
 
 interface ValidationState {
   lastEmail: string;
-  lastResult: ValidationResult | null;
+  lastResult: EmailValidationResult | null;
   busy: boolean;
 }
 
@@ -14,7 +14,7 @@ const initialState: ValidationState = {
   busy: false,
 };
 
-export const validateEmailThunk = createAsyncThunk<ValidationResult, string>(
+export const validateEmailThunk = createAsyncThunk<EmailValidationResult, string>(
   'validation/validateEmail',
   async (email: string) => {
     return await validateEmail(email);
