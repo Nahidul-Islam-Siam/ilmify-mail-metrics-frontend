@@ -4,10 +4,15 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePermission } from '@/features/auth/usePermission';
+import {
+  getPasswordInputType,
+  togglePasswordVisibility,
+} from '@/features/auth/passwordVisibility';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, loading } = usePermission();
   const router = useRouter();
@@ -187,23 +192,51 @@ export default function LoginPage() {
               <label style={{ fontSize: '12px', fontWeight: 600, color: '#CBD5E1' }}>Password</label>
               <Link href="/forgot-password" style={{ fontSize: '11px', color: '#818CF8', textDecoration: 'none' }}>Forgot?</Link>
             </div>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                background: 'rgba(0,0,0,0.3)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: '8px',
-                color: '#fff',
-                fontSize: '13px',
-                outline: 'none'
-              }}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={getPasswordInputType(passwordVisible)}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px 44px 10px 14px',
+                  background: 'rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '13px',
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="button"
+                aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+                title={passwordVisible ? 'Hide password' : 'Show password'}
+                onClick={() => setPasswordVisible(togglePasswordVisibility)}
+                style={{
+                  position: 'absolute', top: '50%', right: '12px',
+                  transform: 'translateY(-50%)', display: 'grid', placeItems: 'center',
+                  width: '24px', height: '24px', padding: 0, border: 0,
+                  background: 'transparent', color: '#94A3B8', cursor: 'pointer'
+                }}
+              >
+                {passwordVisible ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 3l18 18" />
+                    <path d="M10.6 10.6a2 2 0 002.8 2.8" />
+                    <path d="M9.9 4.2A10.8 10.8 0 0112 4c5 0 9 4 10 8a11.8 11.8 0 01-2.1 4.1" />
+                    <path d="M6.6 6.6A11.7 11.7 0 002 12c1 4 5 8 10 8a10.8 10.8 0 005.4-1.4" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {error && <p role="alert" style={{ color: '#FCA5A5', fontSize: 12 }}>{error}</p>}
