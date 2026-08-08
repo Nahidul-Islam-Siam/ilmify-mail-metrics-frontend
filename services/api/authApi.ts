@@ -21,6 +21,11 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' ? value as Record<string, unknown> : null;
 }
 
+function unwrapData(value: unknown): unknown {
+  const envelope = asRecord(value);
+  return envelope && 'data' in envelope ? envelope.data : value;
+}
+
 export function parseAuthUser(value: unknown): RbacUser | null {
   const record = asRecord(value);
   if (!record) return null;
@@ -41,7 +46,7 @@ export function parseAuthUser(value: unknown): RbacUser | null {
 }
 
 export function parseAuthSession(value: unknown): AuthSession | null {
-  const record = asRecord(value);
+  const record = asRecord(unwrapData(value));
   if (!record) return null;
   const accessToken = record.accessToken ?? record.token;
   const user = parseAuthUser(record.user);
@@ -73,8 +78,9 @@ export async function profileRequest(accessToken: string): Promise<RbacUser> {
   const response = await fetch(buildApiUrl('/api/auth/me'), { headers: { Authorization: `Bearer ${accessToken}` } });
   const body = await responseBody(response);
   if (!response.ok) throw new AuthApiError(response.status, errorMessage(body, 'Unable to restore session.'));
-  const record = asRecord(body);
-  const user = parseAuthUser(record?.user ?? body);
+  const data = unwrapData(body);
+  const record = asRecord(data);
+  const user = parseAuthUser(record?.user ?? data);
   if (!user) throw new AuthApiError(502, 'Invalid profile response.');
   return user;
 }
