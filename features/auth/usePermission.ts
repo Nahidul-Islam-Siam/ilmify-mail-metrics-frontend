@@ -1,5 +1,9 @@
 import { getDefaultDashboard } from '@/lib/auth-routing';
 import {
+  authMarkerCookie,
+  clearAuthMarkerCookie,
+} from '@/features/auth/authMarker';
+import {
   canUserCreateRole,
   getCreatableRoles,
   hasPermissionForUser,
@@ -44,6 +48,7 @@ export function usePermission(): PermissionContextValue {
     login: async (email, password) => {
       try {
         const session = await dispatch(loginThunk({ email, password })).unwrap();
+        document.cookie = authMarkerCookie(process.env.NODE_ENV === 'production');
         return { success: true, destination: getDefaultDashboard(session.user.role) };
       } catch (error) {
         return {
@@ -57,7 +62,11 @@ export function usePermission(): PermissionContextValue {
       }
     },
     logout: async () => {
-      await dispatch(logoutThunk(selectRestorableTokens(auth))).unwrap();
+      try {
+        await dispatch(logoutThunk(selectRestorableTokens(auth))).unwrap();
+      } finally {
+        document.cookie = clearAuthMarkerCookie(process.env.NODE_ENV === 'production');
+      }
     },
     updateUser: (fields) => {
       dispatch(updateUser(fields));
