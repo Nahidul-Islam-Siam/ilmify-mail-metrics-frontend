@@ -2,21 +2,23 @@
 
 ## Goal
 
-Preserve the complete existing `/dashboard` visual design for every dashboard entry point, including `/super-admin`. The authentication and route separation remain unchanged.
+Restore the visual appearance from the repository's first commit (`a41bb0f`) for every dashboard entry point, including `/super-admin`. This is a UI restoration only: the current TypeScript architecture, authentication, API integration, and route separation remain unchanged.
 
 ## Visual behavior
 
-- `/dashboard` remains the visual reference and is not redesigned.
-- `/super-admin` renders the same dashboard header, metric cards, charts, activity table, spacing, colors, typography, and responsive behavior.
-- Dashboard routes continue to use their role-appropriate sidebar navigation while sharing the same shell styling.
+- The first commit's dashboard is the visual reference, including its full sidebar, top bar, metric cards, charts, activity table, icons, spacing, colors, typography, and responsive behavior.
+- `/dashboard` and `/super-admin` use that same visual system.
+- Dashboard routes continue to use their role-appropriate navigation items while sharing the restored sidebar appearance.
 - No new dashboard visual language or simplified card-grid landing screen is introduced.
 
 ## Architecture
 
-- Extract the existing dashboard page presentation into a shared dashboard overview component.
+- Recreate the first commit's appearance inside the current TypeScript components; do not restore or copy the obsolete JavaScript architecture.
+- Extract the dashboard page presentation into a shared dashboard overview component.
 - Render that component from both `/dashboard` and `/super-admin` so the design cannot drift between roles.
 - Keep the existing route-group structure, Redux authentication state, API services, and middleware behavior.
 - Keep the distinct dashboard and Super Admin navigation definitions so future access restrictions can be introduced without another visual rewrite.
+- Keep real authenticated user information and logout behavior in the restored top bar; do not restore the original demo role switcher.
 
 ## Data behavior
 
