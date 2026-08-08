@@ -3,15 +3,15 @@
 ## Goal
 
 Separate platform management from normal email-validation work in the frontend
-without duplicating feature implementations. Admin receives the same frontend
-access as Super Admin for this MVP; permissions can be reduced later.
+without duplicating feature implementations. All authenticated roles receive the
+same frontend access to both areas for this MVP; permissions can be reduced later.
 
 ## Routes and access
 
-- `/super-admin` is the landing area for `superadmin` and `admin`.
-- `/dashboard` is the landing area for `user`, `client`, and `sub_user`.
-- Super Admin and Admin may also open shared validation features.
-- User and Sub User must be redirected away from `/super-admin` to `/dashboard`.
+- `/super-admin` is the default landing area for `superadmin` and `admin`.
+- `/dashboard` is the default landing area for `user`, `client`, and `sub_user`.
+- Every authenticated role may open both `/super-admin` and `/dashboard`.
+- Route-level role restrictions are intentionally deferred until after the MVP.
 - Unauthenticated visitors must be redirected to `/login`.
 
 After login, the frontend routes the authenticated account to the correct landing
@@ -41,11 +41,11 @@ control routing and navigation.
 
 Route guards wait until authentication restoration finishes before redirecting,
 preventing redirect flashes. Invalid or expired sessions clear local state and go
-to `/login`. Unauthorized dashboard paths redirect to the correct role landing
-page rather than rendering an access-denied page inside the wrong shell.
+to `/login`. Both dashboard paths require authentication but do not enforce
+different role or permission sets yet.
 
 ## Verification
 
-Frontend tests will cover role normalization and role-to-dashboard routing as pure
-functions. Type checking and the production build must pass. Manual route review
-must confirm each role sees only its intended shell and navigation.
+Frontend tests will cover role normalization and default role-to-dashboard routing
+as pure functions. Type checking and the production build must pass. Manual route
+review must confirm both shells are available to every authenticated role.
