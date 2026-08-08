@@ -23,6 +23,19 @@ function isEmailValidationResult(value: unknown): value is EmailValidationResult
   );
 }
 
+function unwrapData(value: unknown): unknown {
+  if (value && typeof value === 'object' && 'data' in value) {
+    return (value as { data: unknown }).data;
+  }
+  return value;
+}
+
+export function parseEmailValidationResponse(value: unknown): EmailValidationResult {
+  const result = unwrapData(value);
+  if (!isEmailValidationResult(result)) throw new Error('Invalid validation response');
+  return result;
+}
+
 export async function validateSingleEmail(
   email: string,
   smtp = true,
@@ -33,9 +46,7 @@ export async function validateSingleEmail(
     body: JSON.stringify({ email: email.trim().toLowerCase(), smtp }),
   });
   if (!response.ok) throw new Error(`Validation failed (${response.status})`);
-  const body: unknown = await response.json();
-  if (!isEmailValidationResult(body)) throw new Error('Invalid validation response');
-  return body;
+  return parseEmailValidationResponse(await response.json());
 }
 
 export const validateEmail = validateSingleEmail;
@@ -49,7 +60,7 @@ export async function validateBulkEmails(
     body: JSON.stringify({ emails }),
   });
   if (!response.ok) throw new Error(`Bulk validation failed (${response.status})`);
-  const body: unknown = await response.json();
+  const body = unwrapData(await response.json());
   if (!body || typeof body !== 'object') throw new Error('Invalid bulk validation response');
   const result = body as Record<string, unknown>;
   if (
