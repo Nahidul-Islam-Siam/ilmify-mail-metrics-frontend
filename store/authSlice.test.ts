@@ -5,6 +5,7 @@ import authReducer, {
   initialAuthState,
   loginThunk,
   restoreSessionThunk,
+  selectRestorableTokens,
   type AuthState,
 } from './authSlice';
 import type { AuthSession, AuthTokens } from '../lib/auth-api';
@@ -60,5 +61,16 @@ describe('auth slice', () => {
     assert.equal(next.refreshToken, null);
     assert.equal(next.loading, false);
     assert.equal(next.initialized, true);
+  });
+
+  it('selects restorable tokens only when both tokens exist', () => {
+    assert.deepEqual(selectRestorableTokens({ ...initialAuthState, ...session }), {
+      accessToken: 'access-1',
+      refreshToken: 'refresh-1',
+    });
+    assert.equal(selectRestorableTokens({
+      ...initialAuthState,
+      accessToken: 'access-1',
+    }), null);
   });
 });

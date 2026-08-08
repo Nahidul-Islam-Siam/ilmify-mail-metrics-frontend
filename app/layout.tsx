@@ -1,6 +1,5 @@
 import './globals.css';
 import StoreProvider from '../components/StoreProvider';
-import { PermissionProvider } from '../context/PermissionContext';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
@@ -26,9 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       </head>
       <body>
         <StoreProvider>
-          <PermissionProvider>
-            {children}
-          </PermissionProvider>
+          {children}
         </StoreProvider>
       </body>
     </html>

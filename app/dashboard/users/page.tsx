@@ -9,7 +9,7 @@ import type { PermissionDefinition, PermissionName, RbacUser, UserRole } from '.
 interface ManagedUser extends RbacUser { createdAt: string }
 
 export default function UserManagementPage() {
-  const { user: currentUser, role: currentRole, hasPermission, getAllowedRolesToCreate, availablePermissions } = usePermission();
+  const { user: currentUser, role: currentRole, token, hasPermission, getAllowedRolesToCreate, availablePermissions } = usePermission();
 
   const [users, setUsers] = useState<ManagedUser[]>([
     {
@@ -115,7 +115,7 @@ export default function UserManagementPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('mm_token') || ''}`
+          'Authorization': `Bearer ${token || ''}`
         },
         body: JSON.stringify({
           name: formName,

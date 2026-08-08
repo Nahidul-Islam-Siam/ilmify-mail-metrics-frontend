@@ -2,9 +2,6 @@ import { normalizeRole } from './auth-routing';
 import { buildApiUrl } from './api-url';
 import type { RbacUser } from '../types/rbac';
 
-export const ACCESS_TOKEN_KEY = 'mm_access_token';
-export const REFRESH_TOKEN_KEY = 'mm_refresh_token';
-
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
@@ -50,23 +47,6 @@ export function parseAuthSession(value: unknown): AuthSession | null {
   const user = parseAuthUser(record.user);
   if (typeof accessToken !== 'string' || typeof record.refreshToken !== 'string' || !user) return null;
   return { accessToken, refreshToken: record.refreshToken, user };
-}
-
-export function readStoredTokens(storage: Storage): AuthTokens | null {
-  const accessToken = storage.getItem(ACCESS_TOKEN_KEY);
-  const refreshToken = storage.getItem(REFRESH_TOKEN_KEY);
-  return accessToken && refreshToken ? { accessToken, refreshToken } : null;
-}
-
-export function storeTokens(storage: Storage, tokens: AuthTokens): void {
-  storage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
-  storage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
-}
-
-export function clearStoredTokens(storage: Storage): void {
-  storage.removeItem(ACCESS_TOKEN_KEY);
-  storage.removeItem(REFRESH_TOKEN_KEY);
-  storage.removeItem('mm_token');
 }
 
 async function responseBody(response: Response): Promise<unknown> {

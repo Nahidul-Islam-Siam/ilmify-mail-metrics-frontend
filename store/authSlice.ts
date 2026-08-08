@@ -28,6 +28,12 @@ export const initialAuthState: AuthState = {
   error: null,
 };
 
+export function selectRestorableTokens(state: AuthState): AuthTokens | null {
+  return state.accessToken && state.refreshToken
+    ? { accessToken: state.accessToken, refreshToken: state.refreshToken }
+    : null;
+}
+
 interface LoginCredentials {
   email: string;
   password: string;
