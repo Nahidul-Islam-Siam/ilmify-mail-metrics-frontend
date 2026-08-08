@@ -3,8 +3,8 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 import PermissionGuard from '../../../components/rbac/PermissionGuard';
-import { usePermission } from '../../../hooks/usePermission';
-import type { PermissionDefinition, PermissionName, RbacUser, UserRole } from '../../../types/rbac';
+import { usePermission } from '@/features/auth/usePermission';
+import type { PermissionDefinition, PermissionName, RbacUser, UserRole } from '@/features/auth/types';
 
 interface ManagedUser extends RbacUser { createdAt: string }
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
-import StatusBadge from '../../../components/email-validation/StatusBadge';
+import StatusBadge from '@/features/validation/components/StatusBadge';
 
 interface HistoryRecord {
   id: number;

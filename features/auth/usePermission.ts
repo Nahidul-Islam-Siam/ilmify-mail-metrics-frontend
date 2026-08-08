@@ -1,9 +1,9 @@
-import { getDefaultDashboard } from '../lib/auth-routing';
+import { getDefaultDashboard } from '@/lib/auth-routing';
 import {
   canUserCreateRole,
   getCreatableRoles,
   hasPermissionForUser,
-} from '../lib/permission-helpers';
+} from '@/features/auth/permissionHelpers';
 import {
   loginThunk,
   logoutThunk,
@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import type {
   PermissionContextValue,
   PermissionDefinition,
-} from '../types/rbac';
+} from '@/features/auth/types';
 
 const AVAILABLE_PERMISSIONS: PermissionDefinition[] = [
   { id: 'perm-user-create', name: 'user.create', module: 'User Management', label: 'Create User' },

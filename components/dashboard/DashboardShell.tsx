@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
-import type { ChildrenProps } from '../../types/rbac';
+import type { ChildrenProps } from '@/features/auth/types';
 import AuthenticatedRoute from '../rbac/AuthenticatedRoute';
 
 export default function DashboardShell({ children }: ChildrenProps) {

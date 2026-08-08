@@ -10,7 +10,7 @@ import {
   selectRestorableTokens,
 } from '@/redux/features/auth/authSlice';
 import { makeStore } from '@/redux/store';
-import type { ChildrenProps } from '@/types/rbac';
+import type { ChildrenProps } from '@/features/auth/types';
 
 function AuthBootstrap({ children }: ChildrenProps) {
   const dispatch = useAppDispatch();

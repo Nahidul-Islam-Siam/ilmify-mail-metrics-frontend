@@ -1,4 +1,4 @@
-import type { UserRole } from '../types/rbac';
+import type { UserRole } from '@/features/auth/types';
 
 const ROLE_MAP: Record<string, UserRole> = {
   superadmin: 'Super Admin',

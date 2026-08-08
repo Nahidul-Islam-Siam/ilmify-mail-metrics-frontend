@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { usePermission } from '../../hooks/usePermission';
+import { usePermission } from '@/features/auth/usePermission';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

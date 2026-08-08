@@ -8,7 +8,7 @@ import {
   type AuthSession,
   type AuthTokens,
 } from '@/services/api/authApi';
-import type { RbacUser } from '@/types/rbac';
+import type { RbacUser } from '@/features/auth/types';
 
 export interface AuthState {
   user: RbacUser | null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, type FormEvent } from 'react';
-import { usePermission } from '../../../hooks/usePermission';
+import { usePermission } from '@/features/auth/usePermission';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 import SettingsLayout from '../../../components/settings/SettingsLayout';
 import SettingsCard from '../../../components/settings/SettingsCard';

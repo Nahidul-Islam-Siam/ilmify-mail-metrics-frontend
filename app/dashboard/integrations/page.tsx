@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePermission } from '../../../hooks/usePermission';
+import { usePermission } from '@/features/auth/usePermission';
 import ProtectedRoute from '../../../components/rbac/ProtectedRoute';
 import IntegrationCard from '../../../components/integrations/IntegrationCard';
 import SyncStatus from '../../../components/integrations/SyncStatus';

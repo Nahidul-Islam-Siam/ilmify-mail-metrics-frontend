@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useRef, useCallback } from 'react';
 import Toast from './Toast';
-import type { ChildrenProps } from '../types/rbac';
+import type { ChildrenProps } from '@/features/auth/types';
 import type { ToastFunction } from '../types/ui';
 
 const ToastContext = createContext<ToastFunction | null>(null);

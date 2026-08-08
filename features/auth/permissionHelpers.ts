@@ -3,7 +3,7 @@ import type {
   PermissionName,
   RbacUser,
   RoleName,
-} from '../types/rbac';
+} from '@/features/auth/types';
 
 const ROLE_RANKS: Record<RoleName, number> = {
   'Super Admin': 4,

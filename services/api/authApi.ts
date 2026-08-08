@@ -1,6 +1,6 @@
 import { normalizeRole } from '@/lib/auth-routing';
 import { buildApiUrl } from './apiUrl';
-import type { RbacUser } from '@/types/rbac';
+import type { RbacUser } from '@/features/auth/types';
 
 export interface AuthTokens {
   accessToken: string;

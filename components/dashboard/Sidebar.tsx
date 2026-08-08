@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { USER_NAVIGATION } from '../../lib/dashboard-navigation';
-import { usePermission } from '../../hooks/usePermission';
+import { usePermission } from '@/features/auth/usePermission';
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const pathname = usePathname();

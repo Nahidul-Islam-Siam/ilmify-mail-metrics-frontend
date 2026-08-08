@@ -2,7 +2,7 @@ import type {
   BulkValidationResult,
   EmailValidationResult,
   ValidationStatus,
-} from '@/types/validation';
+} from '@/features/validation/types';
 import { buildApiUrl } from './apiUrl';
 
 const STATUSES: ValidationStatus[] = ['valid', 'invalid', 'risky', 'unknown'];

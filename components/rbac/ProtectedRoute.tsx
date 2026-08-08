@@ -1,8 +1,8 @@
 'use client';
 
-import { usePermission } from '../../hooks/usePermission';
+import { usePermission } from '@/features/auth/usePermission';
 import type { ReactNode } from 'react';
-import type { PermissionName } from '../../types/rbac';
+import type { PermissionName } from '@/features/auth/types';
 
 interface ProtectedRouteProps {
   permission?: PermissionName;

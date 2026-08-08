@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { usePermission } from '../../hooks/usePermission';
-import type { RoleName } from '../../types/rbac';
+import { usePermission } from '@/features/auth/usePermission';
+import type { RoleName } from '@/features/auth/types';
 
 export default function Topbar({ onMenuClick }: { onMenuClick(): void }) {
   const { user, role, logout } = usePermission();

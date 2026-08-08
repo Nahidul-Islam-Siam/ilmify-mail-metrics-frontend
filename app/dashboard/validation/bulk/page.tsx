@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef, useState, type ChangeEvent } from 'react';
-import StatusBadge from '../../../../components/email-validation/StatusBadge';
+import StatusBadge from '@/features/validation/components/StatusBadge';
 import { validateBulkEmails } from '@/services/api/validationApi';
-import type { BulkValidationResult, EmailValidationResult } from '../../../../types/validation';
+import type { BulkValidationResult, EmailValidationResult } from '@/features/validation/types';
 
 type ProcessingState = 'idle' | 'processing' | 'complete' | 'error';
 

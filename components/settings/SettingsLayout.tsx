@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import type { RoleName } from '../../types/rbac';
+import type { RoleName } from '@/features/auth/types';
 
 export const SETTINGS_SECTIONS = [
   { id: 'general', label: '1. General', icon: '⚙️', category: 'general', permission: 'settings.manage' },

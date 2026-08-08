@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { usePermission } from '../../hooks/usePermission';
+import { usePermission } from '@/features/auth/usePermission';
 
 export default function AuthenticatedRoute({ children }: { children: ReactNode }) {
   const { loading, token, user } = usePermission();

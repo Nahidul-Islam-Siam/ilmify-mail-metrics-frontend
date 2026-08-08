@@ -5,8 +5,8 @@ import {
   canUserCreateRole,
   getCreatableRoles,
   hasPermissionForUser,
-} from './permission-helpers';
-import type { RbacUser } from '../types/rbac';
+} from './permissionHelpers';
+import type { RbacUser } from '@/features/auth/types';
 
 function user(role: RbacUser['role'], permissions: string[] = []): RbacUser {
   return {

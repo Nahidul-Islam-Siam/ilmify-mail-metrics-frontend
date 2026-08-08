@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import CheckResultCard from '../../../../components/email-validation/CheckResultCard';
-import StatusBadge from '../../../../components/email-validation/StatusBadge';
+import CheckResultCard from '@/features/validation/components/CheckResultCard';
+import StatusBadge from '@/features/validation/components/StatusBadge';
 import ProtectedRoute from '../../../../components/rbac/ProtectedRoute';
 import { validateSingleEmail } from '@/services/api/validationApi';
-import type { EmailValidationResult } from '../../../../types/validation';
+import type { EmailValidationResult } from '@/features/validation/types';
 
 const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   syntax: 'Syntax',

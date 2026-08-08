@@ -1,6 +1,6 @@
 'use client';
 
-import type { PermissionDefinition, PermissionName } from '../../types/rbac';
+import type { PermissionDefinition, PermissionName } from '@/features/auth/types';
 
 interface PermissionSelectorProps {
   availablePermissions?: Array<PermissionDefinition | PermissionName>;
