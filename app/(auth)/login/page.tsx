@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { usePermission } from '@/features/auth/usePermission';
 import {
   getPasswordInputType,
@@ -15,14 +14,15 @@ export default function LoginPage() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, loading } = usePermission();
-  const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     const result = await login(email, password);
-    if (result.success) router.replace(result.destination);
-    else setError(result.error);
+    if (result.success) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      window.location.replace(result.destination);
+    } else setError(result.error);
   };
 
   const handleSocialLogin = (provider: string): void => {
