@@ -81,11 +81,10 @@ CSV output includes a header row and UTF-8 BOM for reliable spreadsheet compatib
 
 ## Excel Behavior
 
-The existing SheetJS dependency used by bulk workbook upload is reused. The workbook contains one worksheet named `Validation Results` with:
+The existing `write-excel-file` dependency used by the bulk workbook workflow is reused. The workbook contains one worksheet named `Validation Results` with:
 
 - A styled header row where supported by the current library build.
-- Auto-filter across all exported columns.
-- A frozen first row where supported.
+- A frozen first row through the library's `stickyRowsCount` option.
 - Practical column widths based on the known fields.
 - Plain cell values that cannot execute spreadsheet formulas.
 
