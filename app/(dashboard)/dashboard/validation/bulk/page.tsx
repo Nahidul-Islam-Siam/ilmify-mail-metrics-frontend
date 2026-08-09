@@ -6,6 +6,13 @@ import { validateBulkEmails, ValidationApiError } from '@/services/api/validatio
 import type { BulkValidationResult, EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
 import { createEmailTemplateWorkbook, parseWorkbookEmails } from '@/features/validation/bulkWorkbook';
+import {
+  createExportFilename,
+  createValidationCsv,
+  createValidationWorkbook,
+  filterValidationResults,
+  type ExportFilter,
+} from '@/features/validation/validationExport';
 
 type ProcessingState = 'idle' | 'processing' | 'complete' | 'error';
 
@@ -20,10 +27,6 @@ function parseEmails(content: string): string[] {
   );
 }
 
-function csvCell(value: string | number): string {
-  return `"${String(value).replace(/"/g, '""')}"`;
-}
-
 export default function BulkValidationPage() {
   const { token, refreshAccessToken } = usePermission();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +34,7 @@ export default function BulkValidationPage() {
   const [filename, setFilename] = useState('');
   const [result, setResult] = useState<BulkValidationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [exportFilter, setExportFilter] = useState<ExportFilter>('all');
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -40,6 +44,7 @@ export default function BulkValidationPage() {
     setFilename(file.name);
     setResult(null);
     setError(null);
+    setExportFilter('all');
 
     const extension = file.name.split('.').pop()?.toLowerCase();
     if (extension !== 'csv' && extension !== 'txt' && extension !== 'xlsx') {
@@ -103,27 +108,49 @@ export default function BulkValidationPage() {
     }
   }
 
-  function downloadResults() {
-    if (!result) return;
-    const header = ['email', 'normalizedEmail', 'status', 'score', 'blacklist', 'ownership', 'reasons', 'checkedAt'];
-    const rows = result.results.map((row) => [
-      row.email,
-      row.normalizedEmail,
-      row.status,
-      row.score,
-      row.checks.blacklist,
-      row.checks.ownership,
-      row.reasons.join('|'),
-      row.checkedAt,
-    ]);
-    const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  function downloadBlob(blob: Blob, downloadFilename: string) {
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'mailmetric-validation-results.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    link.download = downloadFilename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    try {
+      link.click();
+    } finally {
+      URL.revokeObjectURL(url);
+      link.remove();
+    }
   }
+
+  function downloadCsv() {
+    if (filteredResults.length === 0) return;
+    setError(null);
+    try {
+      downloadBlob(
+        new Blob([createValidationCsv(filteredResults)], { type: 'text/csv;charset=utf-8' }),
+        createExportFilename(exportFilter, 'csv'),
+      );
+    } catch {
+      setError('The CSV export could not be created. Please try again.');
+    }
+  }
+
+  async function downloadExcel() {
+    if (filteredResults.length === 0) return;
+    setError(null);
+    try {
+      const workbook = await createValidationWorkbook(filteredResults);
+      downloadBlob(
+        new Blob([workbook], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+        createExportFilename(exportFilter, 'xlsx'),
+      );
+    } catch {
+      setError('The Excel export could not be created. Please try again.');
+    }
+  }
+
+  const filteredResults = result ? filterValidationResults(result.results, exportFilter) : [];
 
   const stats: Array<[string, number, string]> = result
     ? [
@@ -184,11 +211,32 @@ export default function BulkValidationPage() {
           </div>
 
           <div style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 14, overflow: 'hidden' }}>
-            <div style={{ padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #EAECF0' }}>
-              <strong>Validation results</strong>
-              <button type="button" onClick={downloadResults} style={{ border: '1px solid #D0D5DD', borderRadius: 8, padding: '8px 14px', background: '#fff', fontWeight: 600 }}>
-                Download CSV
-              </button>
+            <div style={{ padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, borderBottom: '1px solid #EAECF0' }}>
+              <div>
+                <strong style={{ display: 'block' }}>Validation results</strong>
+                <span style={{ color: '#667085', fontSize: 12 }}>{filteredResults.length} matching results</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                <label htmlFor="export-filter" style={{ fontSize: 12, fontWeight: 600, color: '#475467' }}>Export</label>
+                <select
+                  id="export-filter"
+                  value={exportFilter}
+                  onChange={(event) => setExportFilter(event.target.value as ExportFilter)}
+                  style={{ border: '1px solid #D0D5DD', borderRadius: 8, padding: '8px 10px', background: '#fff', color: '#344054' }}
+                >
+                  <option value="all">All results</option>
+                  <option value="valid">Valid only</option>
+                  <option value="invalid">Invalid only</option>
+                  <option value="risky">Risky only</option>
+                  <option value="unknown">Unknown only</option>
+                </select>
+                <button type="button" onClick={downloadCsv} disabled={filteredResults.length === 0} style={{ border: '1px solid #D0D5DD', borderRadius: 8, padding: '8px 14px', background: '#fff', fontWeight: 600, cursor: filteredResults.length === 0 ? 'not-allowed' : 'pointer', opacity: filteredResults.length === 0 ? 0.5 : 1 }}>
+                  Export CSV
+                </button>
+                <button type="button" onClick={downloadExcel} disabled={filteredResults.length === 0} style={{ border: 0, borderRadius: 8, padding: '9px 14px', background: '#7C3AED', color: '#fff', fontWeight: 600, cursor: filteredResults.length === 0 ? 'not-allowed' : 'pointer', opacity: filteredResults.length === 0 ? 0.5 : 1 }}>
+                  Export Excel
+                </button>
+              </div>
             </div>
             <div style={{ overflowX: 'auto', maxHeight: 520 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
