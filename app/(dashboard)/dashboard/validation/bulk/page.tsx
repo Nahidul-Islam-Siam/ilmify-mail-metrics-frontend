@@ -5,6 +5,7 @@ import StatusBadge from '@/features/validation/components/StatusBadge';
 import { validateBulkEmails, ValidationApiError } from '@/services/api/validationApi';
 import type { BulkValidationResult, EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
+import { createEmailTemplateWorkbook, parseWorkbookEmails } from '@/features/validation/bulkWorkbook';
 
 type ProcessingState = 'idle' | 'processing' | 'complete' | 'error';
 
@@ -41,13 +42,22 @@ export default function BulkValidationPage() {
     setError(null);
 
     const extension = file.name.split('.').pop()?.toLowerCase();
-    if (extension !== 'csv' && extension !== 'txt') {
+    if (extension !== 'csv' && extension !== 'txt' && extension !== 'xlsx') {
       setState('error');
-      setError('Choose a CSV or TXT file.');
+      setError('Choose a CSV, TXT, or XLSX file.');
       return;
     }
 
-    const emails = parseEmails(await file.text());
+    let emails: string[];
+    try {
+      emails = extension === 'xlsx'
+        ? await parseWorkbookEmails(await file.arrayBuffer())
+        : parseEmails(await file.text());
+    } catch {
+      setState('error');
+      setError('This Excel file could not be read. Upload a valid .xlsx workbook.');
+      return;
+    }
     if (emails.length === 0) {
       setState('error');
       setError('No email addresses were found in this file.');
@@ -73,6 +83,23 @@ export default function BulkValidationPage() {
     } catch (requestError) {
       setState('error');
       setError(requestError instanceof Error ? requestError.message : 'Bulk validation failed');
+    }
+  }
+
+  async function downloadTemplate() {
+    setError(null);
+    try {
+      const workbook = await createEmailTemplateWorkbook();
+      const url = URL.createObjectURL(new Blob([workbook], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'mailmetric-email-template.xlsx';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError('The Excel template could not be created. Please try again.');
     }
   }
 
@@ -110,14 +137,16 @@ export default function BulkValidationPage() {
     <main style={{ maxWidth: 1100, margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
       <header style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: '#101828', marginBottom: 6 }}>Bulk Validation</h1>
-        <p style={{ color: '#667085', margin: 0 }}>Upload a CSV or TXT file containing up to 1,000 email addresses.</p>
+        <p style={{ color: '#667085', margin: 0 }}>Upload a CSV, TXT, or XLSX file containing up to 1,000 email addresses.</p>
       </header>
 
       <section style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 18, padding: 28, textAlign: 'center' }}>
-        <input ref={inputRef} type="file" accept=".csv,.txt,text/csv,text/plain" onChange={handleFile} hidden />
+        <input ref={inputRef} type="file" accept=".csv,.txt,.xlsx,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={handleFile} hidden />
         <div style={{ border: '2px dashed #CBD5E1', borderRadius: 14, padding: 34, background: '#F8FAFC' }}>
           <h2 style={{ fontSize: 17, marginTop: 0 }}>Choose an email list</h2>
-          <p style={{ color: '#667085', fontSize: 13 }}>{filename || 'CSV and TXT files are supported'}</p>
+          <p style={{ color: '#667085', fontSize: 13, marginBottom: 6 }}>{filename || 'CSV, TXT, and XLSX files are supported'}</p>
+          <p style={{ color: '#475467', fontSize: 13, marginTop: 0 }}>Put one email per row under the <strong>email</strong> column.</p>
+          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 10 }}>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -126,6 +155,16 @@ export default function BulkValidationPage() {
           >
             {state === 'processing' ? 'Validating…' : 'Choose file'}
           </button>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              disabled={state === 'processing'}
+              style={{ border: '1px solid #7C3AED', borderRadius: 10, padding: '10px 18px', background: '#fff', color: '#6D28D9', fontWeight: 700, cursor: 'pointer' }}
+            >
+              Download Excel template
+            </button>
+          </div>
+          <p style={{ color: '#667085', fontSize: 12, margin: '14px 0 0' }}>Google Sheets: File → Download → Microsoft Excel (.xlsx), then upload it here.</p>
         </div>
       </section>
 

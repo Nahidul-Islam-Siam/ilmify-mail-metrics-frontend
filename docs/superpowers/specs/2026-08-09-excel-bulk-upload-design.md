@@ -23,7 +23,7 @@ Make bulk validation easier by accepting modern Excel workbooks and providing a 
 
 ## Architecture
 
-Workbook parsing and template generation live in a focused utility, separate from the page and API client. The bulk page selects the parser by extension, then sends the resulting email list through the existing validation and token-refresh flow. The `xlsx` package handles Office Open XML parsing and writing in the browser.
+Workbook parsing and template generation live in a focused utility, separate from the page and API client. The bulk page selects the parser by extension, then sends the resulting email list through the existing validation and token-refresh flow. The focused `read-excel-file` and `write-excel-file` packages handle Office Open XML parsing and writing in the browser without the known SheetJS `xlsx` advisories.
 
 ## Testing
 

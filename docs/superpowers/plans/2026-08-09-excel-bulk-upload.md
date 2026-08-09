@@ -6,7 +6,7 @@
 
 **Architecture:** Add a browser-compatible workbook utility that converts the first worksheet into the same normalized email array currently produced from text files. Keep file routing, UI state, and validation submission in the bulk page, and use the same utility to generate the template workbook.
 
-**Tech Stack:** Next.js 14, React 18, TypeScript, Node test runner, SheetJS `xlsx`
+**Tech Stack:** Next.js 14, React 18, TypeScript, Node test runner, `read-excel-file`, `write-excel-file`
 
 ## Global Constraints
 
@@ -32,7 +32,7 @@
 
 - [ ] **Step 1: Install the workbook dependency**
 
-Run: `npm install xlsx`
+Run: `npm install read-excel-file write-excel-file`
 
 - [ ] **Step 2: Write failing parser tests**
 
@@ -46,7 +46,7 @@ Expected: FAIL because `bulkWorkbook.ts` does not exist.
 
 - [ ] **Step 4: Implement the minimal parser**
 
-Use `XLSX.read`, select `SheetNames[0]`, convert the sheet with `sheet_to_json(..., { header: 1 })`, flatten string/number cells, and pass their text through a small normalization/deduplication function.
+Use `readXlsxFile`, select the first returned sheet, flatten its cell data, and pass the text through a small normalization/deduplication function.
 
 - [ ] **Step 5: Verify parser GREEN**
 
@@ -60,7 +60,7 @@ Read the buffer returned by `createEmailTemplateWorkbook`; assert that the first
 
 - [ ] **Step 7: Implement template generation and verify GREEN**
 
-Use `aoa_to_sheet`, `book_new`, `book_append_sheet`, and `write(..., { bookType: 'xlsx', type: 'array' })`, then rerun the focused test.
+Use `writeXlsxFile` with the `Emails` sheet name, header styling, and a readable email-column width, then return the generated Blob as an ArrayBuffer and rerun the focused test.
 
 ### Task 2: Bulk upload interface
 
