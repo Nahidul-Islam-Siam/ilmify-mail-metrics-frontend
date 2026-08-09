@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import readXlsxFile from 'read-excel-file/node';
 import type { EmailValidationResult, ValidationStatus } from './types';
 import {
   EXPORT_HEADERS,
   createExportFilename,
   createValidationCsv,
+  createValidationWorkbook,
   filterValidationResults,
   mapValidationResultToExportRow,
 } from './validationExport';
@@ -68,4 +70,17 @@ test('creates UTF-8 CSV with escaped cells and spreadsheet injection protection'
   assert.match(csv, /'-formula@example\.com/);
   assert.match(csv, /'@formula\.example\.com/);
   assert.match(csv, /"reason, with comma, line\nbreak, quote ""inside"""/);
+});
+
+test('creates a styled validation workbook with stable rows and safe values', async () => {
+  const results = [result('valid'), result('risky', '+malicious@example.com')];
+  const workbook = await createValidationWorkbook(results);
+  const sheets = await readXlsxFile(Buffer.from(workbook));
+
+  assert.equal(sheets[0]?.sheet, 'Validation Results');
+  assert.deepEqual(sheets[0]?.data[0], EXPORT_HEADERS);
+  assert.equal(sheets[0]?.data.length, results.length + 1);
+  assert.equal(sheets[0]?.data[1]?.[0], results[0].email);
+  assert.equal(sheets[0]?.data[1]?.[4], results[0].reasons.join(', '));
+  assert.equal(sheets[0]?.data[2]?.[0], "'+malicious@example.com");
 });

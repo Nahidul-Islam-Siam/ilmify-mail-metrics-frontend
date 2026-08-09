@@ -1,4 +1,5 @@
 import type { EmailValidationResult, ValidationStatus } from './types';
+import writeXlsxFile from 'write-excel-file/browser';
 
 export type ExportFilter = 'all' | ValidationStatus;
 export type ExportFormat = 'csv' | 'xlsx';
@@ -77,4 +78,27 @@ export function createValidationCsv(results: EmailValidationResult[]): string {
     ...rows.map((row) => EXPORT_HEADERS.map((header) => csvCell(row[header])).join(',')),
   ];
   return `\uFEFF${lines.join('\r\n')}`;
+}
+
+export async function createValidationWorkbook(results: EmailValidationResult[]): Promise<ArrayBuffer> {
+  const rows = results.map(mapValidationResultToExportRow);
+  const data = [
+    EXPORT_HEADERS.map((header) => ({
+      value: header,
+      fontWeight: 'bold' as const,
+      fontColor: '#FFFFFF',
+      backgroundColor: '#7C3AED',
+    })),
+    ...rows.map((row) => EXPORT_HEADERS.map((header) => ({
+      value: safeSpreadsheetValue(row[header]),
+    }))),
+  ];
+  const writer = writeXlsxFile(data, {
+    sheet: 'Validation Results',
+    stickyRowsCount: 1,
+    columns: [32, 32, 12, 10, 38, 12, 12, 12, 14, 16, 12, 14, 12, 14, 24]
+      .map((width) => ({ width })),
+  });
+
+  return (await writer.toBlob()).arrayBuffer();
 }
