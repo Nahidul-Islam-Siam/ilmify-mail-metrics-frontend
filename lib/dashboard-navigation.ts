@@ -7,10 +7,10 @@ export const USER_NAVIGATION: DashboardNavigationItem[] = [
   { label: 'Overview', href: '/dashboard' },
   { label: 'Single validation', href: '/dashboard/validation/single' },
   { label: 'Bulk validation', href: '/dashboard/validation/bulk' },
-  { label: 'Validation history', href: '/dashboard/history' },
-  { label: 'Subscription', href: '/dashboard/subscription' },
-  { label: 'Settings', href: '/dashboard/settings' },
-  { label: 'Super Admin area', href: '/super-admin' },
+  // { label: 'Validation history', href: '/dashboard/history' },
+  // { label: 'Subscription', href: '/dashboard/subscription' },
+  // { label: 'Settings', href: '/dashboard/settings' },
+  // { label: 'Super Admin area', href: '/super-admin' },
 ];
 
 export const SUPER_ADMIN_NAVIGATION: DashboardNavigationItem[] = [

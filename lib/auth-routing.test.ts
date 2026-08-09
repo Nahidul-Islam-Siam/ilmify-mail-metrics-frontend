@@ -12,9 +12,9 @@ describe('dashboard role routing', () => {
     assert.equal(normalizeRole('unknown'), null);
   });
 
-  it('selects the default dashboard without restricting either route', () => {
-    assert.equal(getDefaultDashboard('Super Admin'), '/super-admin');
-    assert.equal(getDefaultDashboard('Admin'), '/super-admin');
+  it('sends every role to the management demo dashboard', () => {
+    assert.equal(getDefaultDashboard('Super Admin'), '/dashboard');
+    assert.equal(getDefaultDashboard('Admin'), '/dashboard');
     assert.equal(getDefaultDashboard('User'), '/dashboard');
     assert.equal(getDefaultDashboard('Sub User'), '/dashboard');
   });

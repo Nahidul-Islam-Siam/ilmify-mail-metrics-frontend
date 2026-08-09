@@ -16,9 +16,7 @@ export function normalizeRole(value: unknown): UserRole | null {
 }
 
 export function getDefaultDashboard(
-  role: UserRole,
-): '/super-admin' | '/dashboard' {
-  return role === 'Super Admin' || role === 'Admin'
-    ? '/super-admin'
-    : '/dashboard';
+  _role: UserRole,
+): '/dashboard' {
+  return '/dashboard';
 }
