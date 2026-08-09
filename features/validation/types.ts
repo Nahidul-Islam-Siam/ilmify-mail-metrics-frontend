@@ -11,6 +11,7 @@ export interface EmailValidationResult {
     dns: 'pass' | 'fail' | 'unknown';
     mx: 'pass' | 'fail' | 'unknown';
     disposable: 'pass' | 'fail';
+    publicProvider: 'pass' | 'fail';
     roleAccount: 'pass' | 'warn';
     smtp: 'pass' | 'fail' | 'unknown' | 'skipped';
   };

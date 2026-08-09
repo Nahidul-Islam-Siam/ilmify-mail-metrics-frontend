@@ -6,17 +6,20 @@ import StatusBadge from '@/features/validation/components/StatusBadge';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
 import { validateSingleEmail } from '@/services/api/validationApi';
 import type { EmailValidationResult } from '@/features/validation/types';
+import { usePermission } from '@/features/auth/usePermission';
 
 const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   syntax: 'Syntax',
   dns: 'DNS',
   mx: 'MX records',
   disposable: 'Disposable domain',
+  publicProvider: 'Public email provider',
   roleAccount: 'Role account',
   smtp: 'SMTP mailbox',
 };
 
 export default function SingleValidationDashboardPage() {
+  const { token } = usePermission();
   const [email, setEmail] = useState('test@example.com');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailValidationResult | null>(null);
@@ -28,7 +31,7 @@ export default function SingleValidationDashboardPage() {
     setError(null);
     setResult(null);
     try {
-      setResult(await validateSingleEmail(email, true));
+      setResult(await validateSingleEmail(email, true, token));
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Validation failed');
     } finally {

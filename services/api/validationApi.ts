@@ -39,10 +39,11 @@ export function parseEmailValidationResponse(value: unknown): EmailValidationRes
 export async function validateSingleEmail(
   email: string,
   smtp = true,
+  accessToken?: string | null,
 ): Promise<EmailValidationResult> {
   const response = await fetch(buildApiUrl('/api/validation/single'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify({ email: email.trim().toLowerCase(), smtp }),
   });
   if (!response.ok) throw new Error(`Validation failed (${response.status})`);
@@ -53,10 +54,11 @@ export const validateEmail = validateSingleEmail;
 
 export async function validateBulkEmails(
   emails: string[],
+  accessToken?: string | null,
 ): Promise<BulkValidationResult> {
   const response = await fetch(buildApiUrl('/api/validation/bulk'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify({ emails }),
   });
   if (!response.ok) throw new Error(`Bulk validation failed (${response.status})`);
