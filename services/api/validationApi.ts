@@ -6,6 +6,28 @@ import type {
 import { buildApiUrl } from './apiUrl';
 
 const STATUSES: ValidationStatus[] = ['valid', 'invalid', 'risky', 'unknown'];
+const CHECK_KEYS = [
+  'syntax', 'required', 'length', 'atSign', 'localPart', 'domainPart', 'tld', 'spaces',
+  'characters', 'consecutiveDots', 'dotPosition', 'rfc', 'dns', 'mx', 'disposable',
+  'publicProvider', 'blacklist', 'roleAccount', 'smtp', 'ownership',
+] as const;
+
+function hasCompleteChecks(value: unknown): value is EmailValidationResult['checks'] {
+  if (!value || typeof value !== 'object') return false;
+  const checks = value as Record<string, unknown>;
+  const outcomes: Record<(typeof CHECK_KEYS)[number], readonly string[]> = {
+    syntax: ['pass', 'fail'], required: ['pass', 'fail'], length: ['pass', 'fail'],
+    atSign: ['pass', 'fail'], localPart: ['pass', 'fail'], domainPart: ['pass', 'fail'],
+    tld: ['pass', 'fail'], spaces: ['pass', 'fail'], characters: ['pass', 'fail'],
+    consecutiveDots: ['pass', 'fail'], dotPosition: ['pass', 'fail'], rfc: ['pass', 'fail'],
+    dns: ['pass', 'fail', 'unknown'], mx: ['pass', 'fail', 'unknown'],
+    disposable: ['pass', 'fail', 'unknown'], publicProvider: ['pass', 'fail'],
+    blacklist: ['pass', 'fail', 'unknown'], roleAccount: ['pass', 'warn'],
+    smtp: ['pass', 'fail', 'unknown', 'skipped'], ownership: ['verified', 'not_verified'],
+  };
+  return CHECK_KEYS.every((key) =>
+    typeof checks[key] === 'string' && outcomes[key].includes(checks[key] as string));
+}
 
 export class ValidationApiError extends Error {
   constructor(public readonly status: number, message: string) {
@@ -23,8 +45,7 @@ function isEmailValidationResult(value: unknown): value is EmailValidationResult
     typeof result.status === 'string' &&
     STATUSES.includes(result.status as ValidationStatus) &&
     typeof result.score === 'number' &&
-    !!result.checks &&
-    typeof result.checks === 'object' &&
+    hasCompleteChecks(result.checks) &&
     Array.isArray(result.reasons) &&
     typeof result.checkedAt === 'string'
   );

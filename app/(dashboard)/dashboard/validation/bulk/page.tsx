@@ -105,12 +105,14 @@ export default function BulkValidationPage() {
 
   function downloadResults() {
     if (!result) return;
-    const header = ['email', 'normalizedEmail', 'status', 'score', 'reasons', 'checkedAt'];
+    const header = ['email', 'normalizedEmail', 'status', 'score', 'blacklist', 'ownership', 'reasons', 'checkedAt'];
     const rows = result.results.map((row) => [
       row.email,
       row.normalizedEmail,
       row.status,
       row.score,
+      row.checks.blacklist,
+      row.checks.ownership,
       row.reasons.join('|'),
       row.checkedAt,
     ]);

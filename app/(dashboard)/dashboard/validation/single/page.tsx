@@ -10,12 +10,25 @@ import { usePermission } from '@/features/auth/usePermission';
 
 const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   syntax: 'Syntax',
+  required: 'Required field',
+  length: 'Maximum length',
+  atSign: 'Exactly one @',
+  localPart: 'Local part',
+  domainPart: 'Domain part',
+  tld: 'Top-level domain',
+  spaces: 'No spaces',
+  characters: 'Allowed characters',
+  consecutiveDots: 'No consecutive dots',
+  dotPosition: 'Dot position',
+  rfc: 'RFC-compatible syntax',
   dns: 'DNS',
   mx: 'MX records',
   disposable: 'Disposable domain',
   publicProvider: 'Public email provider',
+  blacklist: 'Internal blacklist',
   roleAccount: 'Role account',
   smtp: 'SMTP mailbox',
+  ownership: 'Ownership verification',
 };
 
 export default function SingleValidationDashboardPage() {
@@ -51,13 +64,12 @@ export default function SingleValidationDashboardPage() {
       <main style={{ maxWidth: 1000, margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
         <header style={{ marginBottom: 24 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#101828', marginBottom: 6 }}>Single Email Validation</h1>
-          <p style={{ color: '#667085', margin: 0 }}>Check syntax, DNS, MX, disposable domains, role accounts, and SMTP.</p>
+          <p style={{ color: '#667085', margin: 0 }}>Check all syntax, DNS/MX, reputation, blacklist, ownership, and optional SMTP rules.</p>
         </header>
 
         <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 18, padding: 24, display: 'flex', gap: 12 }}>
           <input
-            type="email"
-            required
+            type="text"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="person@example.com"
