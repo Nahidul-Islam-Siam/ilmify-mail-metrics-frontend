@@ -11,6 +11,7 @@ import {
 import {
   loginThunk,
   logoutThunk,
+  restoreSessionThunk,
   selectRestorableTokens,
   updateUser,
 } from '@/redux/features/auth/authSlice';
@@ -66,6 +67,15 @@ export function usePermission(): PermissionContextValue {
         await dispatch(logoutThunk(selectRestorableTokens(auth))).unwrap();
       } finally {
         document.cookie = clearAuthMarkerCookie(process.env.NODE_ENV === 'production');
+      }
+    },
+    refreshAccessToken: async () => {
+      const tokens = selectRestorableTokens(auth);
+      if (!tokens) return null;
+      try {
+        return (await dispatch(restoreSessionThunk(tokens)).unwrap()).accessToken;
+      } catch {
+        return null;
       }
     },
     updateUser: (fields) => {

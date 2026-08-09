@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import CheckResultCard from '@/features/validation/components/CheckResultCard';
 import StatusBadge from '@/features/validation/components/StatusBadge';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
-import { validateSingleEmail } from '@/services/api/validationApi';
+import { validateSingleEmail, ValidationApiError } from '@/services/api/validationApi';
 import type { EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
 
@@ -19,7 +19,7 @@ const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
 };
 
 export default function SingleValidationDashboardPage() {
-  const { token } = usePermission();
+  const { token, refreshAccessToken } = usePermission();
   const [email, setEmail] = useState('test@example.com');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailValidationResult | null>(null);
@@ -31,7 +31,14 @@ export default function SingleValidationDashboardPage() {
     setError(null);
     setResult(null);
     try {
-      setResult(await validateSingleEmail(email, true, token));
+      try {
+        setResult(await validateSingleEmail(email, true, token));
+      } catch (requestError) {
+        if (!(requestError instanceof ValidationApiError) || requestError.status !== 401) throw requestError;
+        const refreshedToken = await refreshAccessToken();
+        if (!refreshedToken) throw requestError;
+        setResult(await validateSingleEmail(email, true, refreshedToken));
+      }
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Validation failed');
     } finally {

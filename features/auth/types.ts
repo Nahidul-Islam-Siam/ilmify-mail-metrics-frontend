@@ -37,6 +37,7 @@ export interface PermissionContextValue {
   getAllowedRolesToCreate(): CreatableRole[];
   login(email: string, password: string): Promise<AuthResult>;
   logout(): Promise<void>;
+  refreshAccessToken(): Promise<string | null>;
   updateUser(fields: Partial<RbacUser>): void;
 }
 

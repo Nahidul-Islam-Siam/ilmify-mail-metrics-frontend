@@ -2,7 +2,7 @@
 
 import { useRef, useState, type ChangeEvent } from 'react';
 import StatusBadge from '@/features/validation/components/StatusBadge';
-import { validateBulkEmails } from '@/services/api/validationApi';
+import { validateBulkEmails, ValidationApiError } from '@/services/api/validationApi';
 import type { BulkValidationResult, EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
 
@@ -24,7 +24,7 @@ function csvCell(value: string | number): string {
 }
 
 export default function BulkValidationPage() {
-  const { token } = usePermission();
+  const { token, refreshAccessToken } = usePermission();
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<ProcessingState>('idle');
   const [filename, setFilename] = useState('');
@@ -61,7 +61,14 @@ export default function BulkValidationPage() {
 
     setState('processing');
     try {
-      setResult(await validateBulkEmails(emails, token));
+      try {
+        setResult(await validateBulkEmails(emails, token));
+      } catch (requestError) {
+        if (!(requestError instanceof ValidationApiError) || requestError.status !== 401) throw requestError;
+        const refreshedToken = await refreshAccessToken();
+        if (!refreshedToken) throw requestError;
+        setResult(await validateBulkEmails(emails, refreshedToken));
+      }
       setState('complete');
     } catch (requestError) {
       setState('error');

@@ -7,6 +7,13 @@ import { buildApiUrl } from './apiUrl';
 
 const STATUSES: ValidationStatus[] = ['valid', 'invalid', 'risky', 'unknown'];
 
+export class ValidationApiError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+    this.name = 'ValidationApiError';
+  }
+}
+
 function isEmailValidationResult(value: unknown): value is EmailValidationResult {
   if (!value || typeof value !== 'object') return false;
   const result = value as Record<string, unknown>;
@@ -46,7 +53,7 @@ export async function validateSingleEmail(
     headers: { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify({ email: email.trim().toLowerCase(), smtp }),
   });
-  if (!response.ok) throw new Error(`Validation failed (${response.status})`);
+  if (!response.ok) throw new ValidationApiError(response.status, `Validation failed (${response.status})`);
   return parseEmailValidationResponse(await response.json());
 }
 
@@ -61,7 +68,7 @@ export async function validateBulkEmails(
     headers: { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify({ emails }),
   });
-  if (!response.ok) throw new Error(`Bulk validation failed (${response.status})`);
+  if (!response.ok) throw new ValidationApiError(response.status, `Bulk validation failed (${response.status})`);
   const body = unwrapData(await response.json());
   if (!body || typeof body !== 'object') throw new Error('Invalid bulk validation response');
   const result = body as Record<string, unknown>;
