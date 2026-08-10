@@ -7,6 +7,10 @@ import ProtectedRoute from '@/components/rbac/ProtectedRoute';
 import { validateSingleEmail, ValidationApiError } from '@/services/api/validationApi';
 import type { EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
+import {
+  EMPTY_EMAIL_WARNING,
+  getSingleValidationInputWarning,
+} from '@/features/validation/singleValidationInput';
 
 const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   syntax: 'Syntax',
@@ -33,13 +37,19 @@ const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
 
 export default function SingleValidationDashboardPage() {
   const { token, refreshAccessToken } = usePermission();
-  const [email, setEmail] = useState('test@example.com');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailValidationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const inputWarning = getSingleValidationInputWarning(email);
+    if (inputWarning) {
+      setError(inputWarning);
+      setResult(null);
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
@@ -71,7 +81,10 @@ export default function SingleValidationDashboardPage() {
           <input
             type="text"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (error === EMPTY_EMAIL_WARNING) setError(null);
+            }}
             placeholder="person@example.com"
             style={{ flex: 1, padding: '12px 14px', border: '1px solid #D0D5DD', borderRadius: 10, fontSize: 14 }}
           />
