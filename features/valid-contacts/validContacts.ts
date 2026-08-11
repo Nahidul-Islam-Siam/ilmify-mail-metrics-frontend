@@ -69,6 +69,7 @@ const CONTACT_SEEDS = [
   ['samuel.scott', 'copperline.dev'],
   ['zoey.green', 'firstlight.co'],
   ['leo.adams', 'daybreak.io'],
+  ['siamnahidul093', 'gmail.com'],
 ] as const;
 
 export const MOCK_VALID_CONTACTS: ValidatedContact[] = CONTACT_SEEDS.map(([name, domain], index) => {
