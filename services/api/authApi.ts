@@ -66,7 +66,7 @@ function errorMessage(body: unknown, fallback: string): string {
 }
 
 export async function loginRequest(email: string, password: string): Promise<AuthSession> {
-  const response = await fetch(buildApiUrl('/api/auth/login'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+  const response = await fetch(buildApiUrl('/auth/login'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
   const body = await responseBody(response);
   if (!response.ok) throw new AuthApiError(response.status, errorMessage(body, 'Login failed.'));
   const session = parseAuthSession(body);
@@ -75,7 +75,7 @@ export async function loginRequest(email: string, password: string): Promise<Aut
 }
 
 export async function profileRequest(accessToken: string): Promise<RbacUser> {
-  const response = await fetch(buildApiUrl('/api/auth/me'), { headers: { Authorization: `Bearer ${accessToken}` } });
+  const response = await fetch(buildApiUrl('/auth/me'), { headers: { Authorization: `Bearer ${accessToken}` } });
   const body = await responseBody(response);
   if (!response.ok) throw new AuthApiError(response.status, errorMessage(body, 'Unable to restore session.'));
   const data = unwrapData(body);
@@ -86,7 +86,7 @@ export async function profileRequest(accessToken: string): Promise<RbacUser> {
 }
 
 export async function refreshRequest(refreshToken: string): Promise<AuthSession> {
-  const response = await fetch(buildApiUrl('/api/auth/refresh-token'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }) });
+  const response = await fetch(buildApiUrl('/auth/refresh-token'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }) });
   const body = await responseBody(response);
   if (!response.ok) throw new AuthApiError(response.status, errorMessage(body, 'Session expired.'));
   const session = parseAuthSession(body);
@@ -95,6 +95,6 @@ export async function refreshRequest(refreshToken: string): Promise<AuthSession>
 }
 
 export async function logoutRequest(tokens: AuthTokens): Promise<void> {
-  const response = await fetch(buildApiUrl('/api/auth/logout'), { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokens.accessToken}` }, body: JSON.stringify({ refreshToken: tokens.refreshToken }) });
+  const response = await fetch(buildApiUrl('/auth/logout'), { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokens.accessToken}` }, body: JSON.stringify({ refreshToken: tokens.refreshToken }) });
   if (!response.ok) throw new AuthApiError(response.status, errorMessage(await responseBody(response), 'Logout failed.'));
 }

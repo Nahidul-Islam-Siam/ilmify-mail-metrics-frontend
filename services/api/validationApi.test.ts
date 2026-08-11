@@ -1,6 +1,29 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseEmailValidationResponse, ValidationApiError } from './validationApi';
+import {
+  parseEmailValidationResponse,
+  validateSingleEmail,
+  ValidationApiError,
+} from './validationApi';
+
+test('requests single validation through the versioned API root', async () => {
+  const originalFetch = globalThis.fetch;
+  let requestUrl = '';
+  globalThis.fetch = async (input) => {
+    requestUrl = String(input);
+    return new Response(null, { status: 401 });
+  };
+
+  try {
+    await assert.rejects(
+      validateSingleEmail('user@example.com', true, 'access-token'),
+      ValidationApiError,
+    );
+    assert.equal(requestUrl, '/api/v1/validation/single');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
 
 test('validation API errors preserve the response status for refresh handling', () => {
   assert.equal(new ValidationApiError(401, 'Unauthorized').status, 401);
