@@ -203,6 +203,39 @@ export function getComposerError(
   return null;
 }
 
+export function buildSendEmailInput(
+  selection: ContactSelection,
+  filters: ContactFilters,
+  subject: string,
+  message: string,
+  clientRequestId: string,
+): SendEmailInput {
+  const base = {
+    clientRequestId,
+    subject: subject.trim(),
+    message: message.trim(),
+  };
+  if (selection.mode === 'explicit') {
+    return { ...base, contactIds: selection.ids };
+  }
+  return {
+    ...base,
+    allMatching: {
+      ...(filters.search.trim() ? { search: filters.search.trim() } : {}),
+      ...(filters.validationStatus !== 'all'
+        ? { validationStatus: filters.validationStatus }
+        : {}),
+      ...(filters.source !== 'all' ? { source: filters.source } : {}),
+      ...(filters.activity !== 'all' ? { activity: filters.activity } : {}),
+      ...(filters.dateFrom ? { dateFrom: filters.dateFrom } : {}),
+      ...(filters.dateTo ? { dateTo: filters.dateTo } : {}),
+      ...(selection.excludedIds.length
+        ? { excludedIds: selection.excludedIds }
+        : {}),
+    },
+  };
+}
+
 export function isContactSelected(selection: ContactSelection, contactId: string): boolean {
   return selection.mode === 'explicit'
     ? selection.ids.includes(contactId)

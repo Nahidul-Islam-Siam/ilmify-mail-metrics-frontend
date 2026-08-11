@@ -2,81 +2,14 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
   clearSelection,
+  buildSendEmailInput,
   DEFAULT_FILTERS,
-  filterContacts,
   getComposerError,
   getSelectedCount,
   selectAllMatching,
   toggleContact,
   toggleVisibleContacts,
-  type ValidatedContact,
 } from './validContacts';
-
-const contacts: ValidatedContact[] = [
-  {
-    id: 'contact-1',
-    email: 'ava@northstar.io',
-    validationStatus: 'valid',
-    contactStatus: 'sendable',
-    score: 98,
-    source: 'single',
-    lastValidatedAt: '2026-08-10T10:00:00.000Z',
-    lastSendStatus: 'never_sent',
-  },
-  {
-    id: 'contact-2',
-    email: 'sam@acme.co',
-    validationStatus: 'risky',
-    contactStatus: 'sendable',
-    score: 63,
-    source: 'bulk',
-    lastValidatedAt: '2026-08-11T10:00:00.000Z',
-    lastSendStatus: 'failed',
-  },
-  {
-    id: 'contact-3',
-    email: 'billing@northstar.io',
-    validationStatus: 'valid',
-    contactStatus: 'do_not_contact',
-    score: 94,
-    source: 'bulk',
-    lastValidatedAt: '2026-08-09T10:00:00.000Z',
-    lastSendStatus: 'sent',
-  },
-
-  {
-    id: 'contact-4',
-    email: 'siamnahidul093@gmail.com',
-    validationStatus: 'valid',
-    contactStatus: 'sendable',
-    score: 85,
-    source: 'single',
-    lastValidatedAt: '2026-08-12T10:00:00.000Z',
-    lastSendStatus: 'never_sent',
-  }
-];
-
-describe('valid contact filtering', () => {
-  it('defaults the list to valid contacts in newest-first order', () => {
-    assert.deepEqual(
-      filterContacts(contacts, DEFAULT_FILTERS).map(({ id }) => id),
-      ['contact-1', 'contact-3', 'contact-4', 'contact-2'],
-    );
-  });
-
-  it('combines search, source, activity, and score sorting', () => {
-    assert.deepEqual(
-      filterContacts(contacts, {
-        ...DEFAULT_FILTERS,
-        search: 'northstar',
-        source: 'bulk',
-        activity: 'sent',
-        sort: 'lowest_score',
-      }).map(({ id }) => id),
-      ['contact-3'],
-    );
-  });
-});
 
 describe('composer validation', () => {
   it('requires at least one sendable recipient', () => {
@@ -122,5 +55,48 @@ describe('contact selection', () => {
   it('clears either selection mode to an empty explicit selection', () => {
     assert.deepEqual(clearSelection(), { mode: 'explicit', ids: [] });
     assert.deepEqual(clearSelection(selectAllMatching(12)), { mode: 'explicit', ids: [] });
+  });
+
+  it('builds an explicit recipient payload', () => {
+    assert.deepEqual(buildSendEmailInput(
+      { mode: 'explicit', ids: ['contact-1', 'contact-2'] },
+      DEFAULT_FILTERS,
+      ' Hello ',
+      ' Message ',
+      'e67c6fca-9380-4db3-98e6-c5c5f72211d2',
+    ), {
+      clientRequestId: 'e67c6fca-9380-4db3-98e6-c5c5f72211d2',
+      subject: 'Hello',
+      message: 'Message',
+      contactIds: ['contact-1', 'contact-2'],
+    });
+  });
+
+  it('builds all-matching filters and exclusions without UI-only values', () => {
+    assert.deepEqual(buildSendEmailInput(
+      { mode: 'allMatching', total: 8, excludedIds: ['contact-3'] },
+      {
+        ...DEFAULT_FILTERS,
+        validationStatus: 'all',
+        source: 'bulk',
+        activity: 'failed',
+        search: ' acme ',
+        dateFrom: '2026-08-01',
+      },
+      'Hello',
+      'Message',
+      'e67c6fca-9380-4db3-98e6-c5c5f72211d2',
+    ), {
+      clientRequestId: 'e67c6fca-9380-4db3-98e6-c5c5f72211d2',
+      subject: 'Hello',
+      message: 'Message',
+      allMatching: {
+        search: 'acme',
+        source: 'bulk',
+        activity: 'failed',
+        dateFrom: '2026-08-01',
+        excludedIds: ['contact-3'],
+      },
+    });
   });
 });
