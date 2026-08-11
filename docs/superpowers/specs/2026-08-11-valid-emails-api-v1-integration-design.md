@@ -82,8 +82,14 @@ The backend interceptor wraps the paginated result. The frontend API adapter unw
   page: number;
   limit: number;
   totalPages: number;
+  sendableTotal: number;
 }
 ```
+
+`total` counts all matching rows shown by the contact list, including suppressed
+contacts. `sendableTotal` counts matching contacts whose `contactStatus` is
+`sendable`; select-all uses this value so its displayed count and 25-recipient
+limit remain accurate even when suppressed contacts exist on another page.
 
 Mapping rules:
 
