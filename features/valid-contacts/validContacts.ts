@@ -26,6 +26,49 @@ export interface ContactFilters {
   dateTo: string;
 }
 
+export interface ValidContactsPage {
+  contacts: ValidatedContact[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  sendableTotal: number;
+}
+
+export interface ValidContactsSummary {
+  valid: number;
+  risky: number;
+  suppressed: number;
+  sent: number;
+  neverSent: number;
+}
+
+export interface AllMatchingSelectionInput {
+  search?: string;
+  validationStatus?: ValidationStatus;
+  source?: ContactSource;
+  activity?: Exclude<ContactActivity, 'all'>;
+  dateFrom?: string;
+  dateTo?: string;
+  excludedIds?: string[];
+}
+
+export interface SendEmailInput {
+  clientRequestId: string;
+  subject: string;
+  message: string;
+  contactIds?: string[];
+  allMatching?: AllMatchingSelectionInput;
+}
+
+export interface EmailSendResult {
+  status: 'completed' | 'partial_failure' | 'failed';
+  requestedCount: number;
+  eligibleCount: number;
+  acceptedCount: number;
+  failedCount: number;
+}
+
 export type ContactSelection =
   | { mode: 'explicit'; ids: string[] }
   | { mode: 'allMatching'; total: number; excludedIds: string[] };
