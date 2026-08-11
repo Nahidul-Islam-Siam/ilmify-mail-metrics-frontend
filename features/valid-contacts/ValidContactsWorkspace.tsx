@@ -1,25 +1,34 @@
 'use client';
 
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { clearSession } from '@/redux/features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import {
+  getValidContactsSummary,
+  listValidContacts,
+  sendContactEmail,
+  ValidContactsApiError,
+} from '@/services/api/validContactsApi';
 import styles from './ValidContactsWorkspace.module.css';
 import {
+  buildSendEmailInput,
   clearSelection,
   DEFAULT_FILTERS,
-  filterContacts,
   getComposerError,
   getSelectedCount,
   isContactSelected,
-  MOCK_VALID_CONTACTS,
   selectAllMatching,
   toggleContact,
   toggleVisibleContacts,
   type ContactFilters,
   type ContactSelection,
   type ValidatedContact,
+  type ValidContactsPage,
+  type ValidContactsSummary,
 } from './validContacts';
 
 const PAGE_SIZE = 20;
-const SHARED_FROM = 'Shared Titan mailbox (configured by admin)';
+const SHARED_FROM = 'Configured SMTP mailbox';
 
 const formatDate = (value: string) => new Intl.DateTimeFormat('en', {
   day: '2-digit',
@@ -91,43 +100,128 @@ function ContactRow({
 }
 
 export default function ValidContactsWorkspace() {
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
+  const dispatch = useAppDispatch();
   const [filters, setFilters] = useState<ContactFilters>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
   const [selection, setSelection] = useState<ContactSelection>(clearSelection());
+  const [contactsPage, setContactsPage] = useState<ValidContactsPage>({
+    contacts: [],
+    total: 0,
+    page: 1,
+    limit: PAGE_SIZE,
+    totalPages: 0,
+    sendableTotal: 0,
+  });
+  const [summary, setSummary] = useState<ValidContactsSummary>({
+    valid: 0,
+    risky: 0,
+    suppressed: 0,
+    sent: 0,
+    neverSent: 0,
+  });
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
   const [isSending, setIsSending] = useState(false);
   const [sendFeedback, setSendFeedback] = useState<string | null>(null);
+  const [sendFeedbackTone, setSendFeedbackTone] = useState<
+    'success' | 'warning' | 'error'
+  >('success');
+  const hasLoadedOnce = useRef(false);
 
-  const filteredContacts = useMemo(
-    () => filterContacts(MOCK_VALID_CONTACTS, filters),
-    [filters],
-  );
-  const sendableMatches = useMemo(
-    () => filteredContacts.filter((contact) => contact.contactStatus === 'sendable'),
-    [filteredContacts],
-  );
-  const pageCount = Math.max(1, Math.ceil(filteredContacts.length / PAGE_SIZE));
-  const visibleContacts = filteredContacts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const visibleContacts = contactsPage.contacts;
+  const pageCount = Math.max(1, contactsPage.totalPages);
   const visibleSendableIds = visibleContacts
     .filter((contact) => contact.contactStatus === 'sendable')
     .map((contact) => contact.id);
   const visibleSelected = visibleSendableIds.length > 0
     && visibleSendableIds.every((id) => isContactSelected(selection, id));
-  const selectedContacts = sendableMatches.filter((contact) => isContactSelected(selection, contact.id));
   const selectedCount = getSelectedCount(selection);
-  const riskySelected = selectedContacts.filter((contact) => contact.validationStatus === 'risky').length;
   const composerError = getComposerError(selectedCount, subject, message);
   const allVisibleSelected = selection.mode === 'explicit'
     && visibleSendableIds.length > 0
     && visibleSendableIds.every((id) => selection.ids.includes(id));
 
-  const summary = useMemo(() => ({
-    valid: MOCK_VALID_CONTACTS.filter(({ validationStatus }) => validationStatus === 'valid').length,
-    risky: MOCK_VALID_CONTACTS.filter(({ validationStatus }) => validationStatus === 'risky').length,
-    suppressed: MOCK_VALID_CONTACTS.filter(({ contactStatus }) => contactStatus !== 'sendable').length,
-    contacted: MOCK_VALID_CONTACTS.filter(({ lastSendStatus }) => lastSendStatus === 'sent').length,
-  }), []);
+  const hasActiveFilters = Boolean(
+    filters.search
+    || filters.validationStatus !== DEFAULT_FILTERS.validationStatus
+    || filters.source !== DEFAULT_FILTERS.source
+    || filters.activity !== DEFAULT_FILTERS.activity
+    || filters.dateFrom
+    || filters.dateTo,
+  );
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setDebouncedSearch(filters.search),
+      300,
+    );
+    return () => window.clearTimeout(timer);
+  }, [filters.search]);
+
+  const requestFilters = useMemo(
+    () => ({ ...filters, search: debouncedSearch }),
+    [
+      debouncedSearch,
+      filters.validationStatus,
+      filters.source,
+      filters.activity,
+      filters.sort,
+      filters.dateFrom,
+      filters.dateTo,
+    ],
+  );
+
+  useEffect(() => {
+    if (!accessToken) {
+      setIsInitialLoading(false);
+      setLoadError('Your session has expired. Please sign in again.');
+      return;
+    }
+    const controller = new AbortController();
+    const load = async () => {
+      setLoadError(null);
+      if (hasLoadedOnce.current) setIsRefreshing(true);
+      else setIsInitialLoading(true);
+      try {
+        const [nextPage, nextSummary] = await Promise.all([
+          listValidContacts(
+            requestFilters,
+            page,
+            PAGE_SIZE,
+            accessToken,
+            controller.signal,
+          ),
+          getValidContactsSummary(accessToken, controller.signal),
+        ]);
+        setContactsPage(nextPage);
+        setSummary(nextSummary);
+        hasLoadedOnce.current = true;
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        if (error instanceof ValidContactsApiError && error.status === 401) {
+          dispatch(clearSession());
+        }
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to load valid contacts.',
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsInitialLoading(false);
+          setIsRefreshing(false);
+        }
+      }
+    };
+    void load();
+    return () => controller.abort();
+  }, [accessToken, dispatch, page, reloadKey, requestFilters]);
 
   const updateFilter = <Key extends keyof ContactFilters>(key: Key, value: ContactFilters[Key]) => {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -138,16 +232,52 @@ export default function ValidContactsWorkspace() {
 
   const handleSend = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (composerError) {
-      setSendFeedback(composerError);
+    if (composerError || !accessToken) {
+      setSendFeedback(
+        composerError ?? 'Your session has expired. Please sign in again.',
+      );
+      setSendFeedbackTone('error');
       return;
     }
 
     setIsSending(true);
     setSendFeedback(null);
-    await new Promise((resolve) => setTimeout(resolve, 650));
-    setIsSending(false);
-    setSendFeedback(`${selectedCount} ${selectedCount === 1 ? 'email' : 'emails'} queued in this design preview. No message was sent.`);
+    try {
+      const result = await sendContactEmail(
+        buildSendEmailInput(
+          selection,
+          requestFilters,
+          subject,
+          message,
+          crypto.randomUUID(),
+        ),
+        accessToken,
+      );
+      setSendFeedbackTone(
+        result.status === 'failed'
+          ? 'error'
+          : result.failedCount > 0
+            ? 'warning'
+            : 'success',
+      );
+      setSendFeedback(
+        `${result.acceptedCount} accepted${
+          result.failedCount > 0 ? `, ${result.failedCount} failed` : ''
+        }.`,
+      );
+      setSelection(clearSelection());
+      setReloadKey((value) => value + 1);
+    } catch (error) {
+      if (error instanceof ValidContactsApiError && error.status === 401) {
+        dispatch(clearSession());
+      }
+      setSendFeedbackTone('error');
+      setSendFeedback(
+        error instanceof Error ? error.message : 'Unable to send email.',
+      );
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -158,14 +288,13 @@ export default function ValidContactsWorkspace() {
           <h1>Valid Emails</h1>
           <p>Review verified contacts, choose an audience, and prepare a message from your shared mailbox.</p>
         </div>
-        <span className={styles.previewBadge}>Design preview · Mock data</span>
       </header>
 
       <section className={styles.summaryGrid} aria-label="Contact summary">
         <SummaryCard label="Valid contacts" value={summary.valid} tone="#12B76A" />
         <SummaryCard label="Risky contacts" value={summary.risky} tone="#F79009" />
         <SummaryCard label="Suppressed" value={summary.suppressed} tone="#F04438" />
-        <SummaryCard label="Previously contacted" value={summary.contacted} tone="#7C3AED" />
+        <SummaryCard label="Previously contacted" value={summary.sent} tone="#7C3AED" />
       </section>
 
       <div className={styles.workspaceGrid}>
@@ -173,7 +302,10 @@ export default function ValidContactsWorkspace() {
           <div className={styles.panelHeading}>
             <div>
               <h2>Your email list</h2>
-              <p>{filteredContacts.length} matching contacts</p>
+              <p>
+                {contactsPage.total} matching contacts
+                {isRefreshing && <span className={styles.refreshIndicator}>Updating…</span>}
+              </p>
             </div>
             {(filters.search || filters.validationStatus !== 'valid' || filters.source !== 'all' || filters.activity !== 'all' || filters.dateFrom || filters.dateTo) && (
               <button
@@ -254,6 +386,7 @@ export default function ValidContactsWorkspace() {
                 className={styles.checkbox}
                 type="checkbox"
                 checked={visibleSelected}
+                disabled={isRefreshing || visibleSendableIds.length === 0}
                 onChange={(event) => setSelection((current) => toggleVisibleContacts(current, visibleSendableIds, event.target.checked))}
                 aria-label="Select all sendable contacts on this page"
               />
@@ -265,17 +398,32 @@ export default function ValidContactsWorkspace() {
             )}
           </div>
 
-          {allVisibleSelected && sendableMatches.length > visibleSendableIds.length && (
+          {allVisibleSelected && contactsPage.sendableTotal > visibleSendableIds.length && (
             <div className={styles.selectAllBanner}>
               All {visibleSendableIds.length} sendable contacts on this page are selected.
-              <button type="button" onClick={() => setSelection(selectAllMatching(sendableMatches.length))}>
-                Select all {sendableMatches.length} matching sendable contacts
+              <button type="button" onClick={() => setSelection(selectAllMatching(contactsPage.sendableTotal))}>
+                Select all {contactsPage.sendableTotal} matching sendable contacts
               </button>
             </div>
           )}
 
           <div className={styles.contactList}>
-            {visibleContacts.length ? visibleContacts.map((contact) => (
+            {isInitialLoading ? (
+              <div className={styles.loadingState}>Loading valid contacts…</div>
+            ) : loadError ? (
+              <div className={styles.errorState} role="alert">
+                <div>
+                  <p>{loadError}</p>
+                  <button
+                    className={styles.retryButton}
+                    type="button"
+                    onClick={() => setReloadKey((value) => value + 1)}
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            ) : visibleContacts.length ? visibleContacts.map((contact) => (
               <ContactRow
                 key={contact.id}
                 contact={contact}
@@ -285,20 +433,20 @@ export default function ValidContactsWorkspace() {
             )) : (
               <div className={styles.emptyState}>
                 <span>⌕</span>
-                <h3>No contacts match these filters</h3>
-                <p>Try a broader search or reset the filters.</p>
+                <h3>{hasActiveFilters ? 'No contacts match these filters' : 'No valid contacts saved yet'}</h3>
+                <p>{hasActiveFilters ? 'Try a broader search or reset the filters.' : 'Validate an email to add your first contact.'}</p>
               </div>
             )}
           </div>
 
           <footer className={styles.pagination}>
             <span>
-              Showing {filteredContacts.length ? (page - 1) * PAGE_SIZE + 1 : 0}–{Math.min(page * PAGE_SIZE, filteredContacts.length)} of {filteredContacts.length}
+              Showing {contactsPage.total ? (page - 1) * PAGE_SIZE + 1 : 0}–{Math.min(page * PAGE_SIZE, contactsPage.total)} of {contactsPage.total}
             </span>
             <div>
-              <button type="button" disabled={page === 1} onClick={() => setPage((current) => current - 1)}>Previous</button>
+              <button type="button" disabled={isRefreshing || page === 1} onClick={() => setPage((current) => current - 1)}>Previous</button>
               <span>Page {page} of {pageCount}</span>
-              <button type="button" disabled={page === pageCount} onClick={() => setPage((current) => current + 1)}>Next</button>
+              <button type="button" disabled={isRefreshing || page >= pageCount} onClick={() => setPage((current) => current + 1)}>Next</button>
             </div>
           </footer>
         </section>
@@ -326,17 +474,11 @@ export default function ValidContactsWorkspace() {
               Remove {selectedCount - 25} {selectedCount - 25 === 1 ? 'contact' : 'contacts'} before sending.
             </div>
           )}
-          {riskySelected > 0 && (
-            <div className={`${styles.notice} ${styles.warningNotice}`}>
-              {riskySelected} risky {riskySelected === 1 ? 'address is' : 'addresses are'} selected. Confirm them carefully before sending.
-            </div>
-          )}
-
           <form className={styles.composerForm} onSubmit={handleSend}>
             <label>
               <span>From</span>
               <input value={SHARED_FROM} readOnly />
-              <small>Replies will arrive in the shared Titan inbox.</small>
+              <small>Replies will arrive in the configured sender inbox.</small>
             </label>
             <label>
               <span>Subject</span>
@@ -367,13 +509,13 @@ export default function ValidContactsWorkspace() {
             </label>
 
             {sendFeedback && (
-              <div className={`${styles.sendFeedback} ${composerError ? styles.feedbackError : styles.feedbackSuccess}`} role="status" aria-live="polite">
+              <div className={`${styles.sendFeedback} ${sendFeedbackTone === 'error' ? styles.feedbackError : sendFeedbackTone === 'warning' ? styles.feedbackWarning : styles.feedbackSuccess}`} role="status" aria-live="polite">
                 {sendFeedback}
               </div>
             )}
 
             <button className={styles.sendButton} type="submit" disabled={Boolean(composerError) || isSending}>
-              {isSending ? 'Preparing email…' : `Send ${selectedCount || ''} ${selectedCount === 1 ? 'email' : 'emails'}`.replace('  ', ' ')}
+              {isSending ? 'Sending…' : `Send ${selectedCount || ''} ${selectedCount === 1 ? 'email' : 'emails'}`.replace('  ', ' ')}
               {!isSending && <span aria-hidden="true">↗</span>}
             </button>
             <p className={styles.composerFootnote}>Each recipient receives a separate email. Addresses are never grouped.</p>

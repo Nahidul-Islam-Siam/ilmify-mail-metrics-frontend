@@ -437,6 +437,40 @@
   font-size: 12px;
 }
 
+.loadingState,
+.errorState {
+  display: grid;
+  min-height: 340px;
+  place-items: center;
+  padding: 30px;
+  color: #667085;
+  text-align: center;
+}
+
+.errorState p {
+  margin: 0;
+}
+
+.retryButton {
+  margin-top: 12px;
+  padding: 7px 12px;
+  border: 1px solid #d6bbfb;
+  border-radius: 8px;
+  background: #fff;
+  color: #6941c6;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.refreshIndicator {
+  margin-left: 8px;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -588,6 +622,12 @@
 .feedbackSuccess {
   background: #ecfdf3;
   color: #027a48;
+}
+
+.feedbackWarning {
+  border: 1px solid #fedf89;
+  background: #fffaeb;
+  color: #b54708;
 }
 
 .sendButton {
