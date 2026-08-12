@@ -12,6 +12,7 @@ import ErrorAlert from '@/components/integrations/ErrorAlert';
 import ToggleSwitch from '@/components/settings/ToggleSwitch';
 import SelectInput from '@/components/settings/SelectInput';
 import SaveButton from '@/components/settings/SaveButton';
+import { buildApiUrl } from '@/services/api/apiUrl';
 import type { ToastKind } from '@/types/ui';
 
 interface GoogleStatus {
@@ -111,7 +112,7 @@ export default function IntegrationsDashboardPage() {
   // Fetch Google Integration Status
   const fetchGoogleStatus = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/integrations/google/status', {
+      const res = await fetch(buildApiUrl('/google/status'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (res.ok) {
@@ -127,7 +128,7 @@ export default function IntegrationsDashboardPage() {
   const fetchAvailableSheets = async () => {
     setSheetsLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/integrations/google/sheets', {
+      const res = await fetch(buildApiUrl('/google/sheets'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (res.ok) {
@@ -144,7 +145,7 @@ export default function IntegrationsDashboardPage() {
   // Fetch Sync History Logs
   const fetchSyncLogs = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/integrations/google/logs', {
+      const res = await fetch(buildApiUrl('/google/logs'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (res.ok) {
@@ -162,14 +163,16 @@ export default function IntegrationsDashboardPage() {
   const handleConnectGoogle = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/integrations/google/connect', {
+      const res = await fetch(buildApiUrl('/google/connect'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const data = await res.json();
 
       if (data.auth_url) {
         // Trigger Demo Callback simulation for instant smooth testing
-        const callbackUrl = `http://localhost:4000/api/integrations/google/callback?code=demo_code_99201&state=${user?.id || 'usr-super-admin-1'}`;
+        const callbackUrl = buildApiUrl(
+          `/google/callback?code=demo_code_99201&state=${user?.id || 'usr-super-admin-1'}`,
+        );
         const cbRes = await fetch(callbackUrl, {
           headers: { Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
         });
@@ -205,7 +208,7 @@ export default function IntegrationsDashboardPage() {
   // 2. Select Target Sheet
   const handleSelectSheet = async (sheetId: string, sheetName: string) => {
     try {
-      const res = await fetch('http://localhost:4000/api/integrations/google/select-sheet', {
+      const res = await fetch(buildApiUrl('/google/select-sheet'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +231,7 @@ export default function IntegrationsDashboardPage() {
   // 3. Create New Sheet Automatically
   const handleCreateNewSheet = async (title: string) => {
     try {
-      const res = await fetch('http://localhost:4000/api/integrations/google/create-sheet', {
+      const res = await fetch(buildApiUrl('/google/create-sheet'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -258,7 +261,7 @@ export default function IntegrationsDashboardPage() {
         { email: 'alex.dev@google.com', status: 'VALID', score: 96, format_check: 'PASS', rfc_check: 'PASS', dns_check: 'PASS', mx_check: 'PASS', disposable_check: 'CLEAN', blacklist_check: 'CLEAN', smtp_status: 'VERIFIED' }
       ];
 
-      const res = await fetch('http://localhost:4000/api/integrations/google/sync-now', {
+      const res = await fetch(buildApiUrl('/google/sync-now'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,7 +289,7 @@ export default function IntegrationsDashboardPage() {
   const handleDisconnect = async () => {
     setShowDisconnectModal(false);
     try {
-      await fetch('http://localhost:4000/api/integrations/google/disconnect', {
+      await fetch(buildApiUrl('/google/disconnect'), {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from 'react';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
+import { buildApiUrl } from '@/services/api/apiUrl';
 
 interface DisposableDomain {
   id: string;
@@ -49,7 +50,7 @@ export default function DisposableDomainsPage() {
       if (selectedCategory !== 'All') queryParams.append('category', selectedCategory);
       if (selectedStatus !== 'All') queryParams.append('status', selectedStatus);
 
-      const res = await fetch(`http://localhost:4000/api/disposable-domains?${queryParams.toString()}`);
+      const res = await fetch(buildApiUrl(`/disposable-domains?${queryParams.toString()}`));
       if (res.ok) {
         const data = await res.json();
         setDomains(data.domains || []);
@@ -57,7 +58,7 @@ export default function DisposableDomainsPage() {
         setActiveCount(data.activeCount || 0);
       }
 
-      const pRes = await fetch('http://localhost:4000/api/disposable-domains/providers');
+      const pRes = await fetch(buildApiUrl('/disposable-domains/providers'));
       if (pRes.ok) {
         const pData = await pRes.json();
         setProviders(pData.providers || []);
@@ -75,7 +76,7 @@ export default function DisposableDomainsPage() {
   const handleAddDomain = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:4000/api/disposable-domains', {
+      const res = await fetch(buildApiUrl('/disposable-domains'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -106,7 +107,7 @@ export default function DisposableDomainsPage() {
     if (domainList.length === 0) return;
 
     try {
-      const res = await fetch('http://localhost:4000/api/disposable-domains/bulk', {
+      const res = await fetch(buildApiUrl('/disposable-domains/bulk'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -129,7 +130,7 @@ export default function DisposableDomainsPage() {
 
   const handleToggleStatus = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:4000/api/disposable-domains/${id}/status`, {
+      const res = await fetch(buildApiUrl(`/disposable-domains/${id}/status`), {
         method: 'PATCH'
       });
       if (res.ok) {
@@ -144,7 +145,7 @@ export default function DisposableDomainsPage() {
   const handleDeleteDomain = async (id: string) => {
     if (confirm('Are you sure you want to remove this disposable domain?')) {
       try {
-        const res = await fetch(`http://localhost:4000/api/disposable-domains/${id}`, {
+        const res = await fetch(buildApiUrl(`/disposable-domains/${id}`), {
           method: 'DELETE'
         });
         if (res.ok) {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
+import { buildApiUrl } from '@/services/api/apiUrl';
 
 interface DisposableProvider { name: string; category?: string; domainCount: number }
 
@@ -15,7 +16,7 @@ export default function DisposableProviderManagementPage() {
 
   const fetchProviders = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/disposable-domains/providers');
+      const res = await fetch(buildApiUrl('/disposable-domains/providers'));
       if (res.ok) {
         const data = await res.json();
         setProviders(data.providers || []);

@@ -58,10 +58,12 @@
 ### Task 1: Version and Document the NestJS HTTP Application
 
 **Files:**
+
 - Modify: `backend/src/main.ts`
 - Modify: `backend/src/main.spec.ts`
 
 **Interfaces:**
+
 - Produces: `configureHttpApp(app, configService): void` enabling URI version `1` below global prefix `api`.
 - Produces: `configureSwagger(app): void` exposing Swagger UI at `api/v1/docs` in every environment.
 - Consumes: existing `createApplication()` bootstrap and Vercel handler.
@@ -191,12 +193,14 @@ git -C backend commit -m "feat: version API and publish Swagger"
 ### Task 2: Return Accurate Contact Pagination and Selection Counts
 
 **Files:**
+
 - Modify: `backend/src/valid-contacts/valid-contacts.repository.ts`
 - Modify: `backend/src/valid-contacts/valid-contacts.repository.spec.ts`
 - Modify: `backend/src/valid-contacts/valid-contacts.service.ts`
 - Modify: `backend/src/valid-contacts/valid-contacts.service.spec.ts`
 
 **Interfaces:**
+
 - Produces: repository `list(...) => Promise<{ data: ValidatedContactRecord[]; total: number; sendableTotal: number }>`.
 - Produces: service `list(...) => { data, pagination: IPagination & { sendableTotal: number } }`.
 - Produces: `resolveSendRecipients()` with no implicit `valid` filter when all statuses were selected.
@@ -353,6 +357,7 @@ git -C backend commit -m "fix: expose sendable contact totals"
 ### Task 3: Add Swagger Metadata and Versioned End-to-End Contracts
 
 **Files:**
+
 - Modify: `backend/src/valid-contacts/valid-contacts.controller.ts`
 - Modify: `backend/src/valid-contacts/valid-contacts.controller.spec.ts`
 - Modify: `backend/src/email-sends/email-sends.controller.ts`
@@ -360,6 +365,7 @@ git -C backend commit -m "fix: expose sendable contact totals"
 - Modify: `backend/test/mailmetric.e2e-spec.ts`
 
 **Interfaces:**
+
 - Produces: Swagger tags `Valid Contacts` and `Email Sends` with bearer-auth requirements.
 - Consumes: versioned routing from Task 1 and pagination response from Task 2.
 
@@ -480,6 +486,7 @@ git -C backend commit -m "test: cover versioned contacts and email APIs"
 ### Task 4: Migrate Every Frontend Service to the Versioned API Root
 
 **Files:**
+
 - Modify: `frontend/.env.example`
 - Modify: `frontend/services/api/apiUrl.ts`
 - Modify: `frontend/services/api/apiUrl.test.ts`
@@ -489,6 +496,7 @@ git -C backend commit -m "test: cover versioned contacts and email APIs"
 - Modify: `frontend/services/api/validationApi.test.ts`
 
 **Interfaces:**
+
 - Produces: `buildApiUrl(resourcePath, baseUrl?)` joining a full API root and a resource-relative path.
 - Consumes: production/local base ending in `/api/v1`.
 
@@ -570,11 +578,13 @@ git -C frontend commit -m "refactor: use versioned API root"
 ### Task 5: Build the Valid Contacts HTTP Adapter
 
 **Files:**
+
 - Create: `frontend/services/api/validContactsApi.ts`
 - Create: `frontend/services/api/validContactsApi.test.ts`
 - Modify: `frontend/features/valid-contacts/validContacts.ts`
 
 **Interfaces:**
+
 - Produces: `listValidContacts(filters, page, limit, accessToken, signal?) => Promise<ValidContactsPage>`.
 - Produces: `getValidContactsSummary(accessToken, signal?) => Promise<ValidContactsSummary>`.
 - Produces: `sendContactEmail(input, accessToken) => Promise<EmailSendResult>`.
@@ -756,10 +766,12 @@ git -C frontend commit -m "feat: add valid contacts API client"
 ### Task 6: Build Explicit and All-Matching Send Payloads
 
 **Files:**
+
 - Modify: `frontend/features/valid-contacts/validContacts.ts`
 - Modify: `frontend/features/valid-contacts/validContacts.test.ts`
 
 **Interfaces:**
+
 - Produces: `buildSendEmailInput(selection, filters, subject, message, clientRequestId): SendEmailInput`.
 - Consumes: `ContactSelection`, `ContactFilters`, and the Task 5 send-input types.
 
@@ -875,10 +887,12 @@ git -C frontend commit -m "feat: build contact email selections"
 ### Task 7: Connect the Valid Emails Workspace to Persisted APIs
 
 **Files:**
+
 - Modify: `frontend/features/valid-contacts/ValidContactsWorkspace.tsx`
 - Modify: `frontend/features/valid-contacts/ValidContactsWorkspace.module.css`
 
 **Interfaces:**
+
 - Consumes: Redux `state.auth.accessToken` and `clearSession()`.
 - Consumes: Task 5 list/summary/send API functions and error class.
 - Consumes: Task 6 `buildSendEmailInput()`.
@@ -1088,9 +1102,11 @@ git -C frontend commit -m "feat: connect valid emails workspace"
 ### Task 8: Complete Cross-Repository Verification and Release Checks
 
 **Files:**
+
 - Modify only if a test proves necessary: files already named in Tasks 1–7.
 
 **Interfaces:**
+
 - Consumes: all prior tasks.
 - Produces: locally verified backend/frontend builds and a deployment checklist without sending a real email.
 

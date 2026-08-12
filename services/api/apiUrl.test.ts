@@ -14,6 +14,20 @@ test('falls back to same-origin /api/v1', () => {
   assert.equal(buildApiUrl('/auth/login', ''), '/api/v1/auth/login');
 });
 
+test('adds the versioned API root to a configured backend origin', () => {
+  assert.equal(
+    buildApiUrl('/auth/login', 'https://backend.example.com'),
+    'https://backend.example.com/api/v1/auth/login',
+  );
+});
+
+test('upgrades a legacy configured /api base to /api/v1', () => {
+  assert.equal(
+    buildApiUrl('/auth/login', 'https://backend.example.com/api'),
+    'https://backend.example.com/api/v1/auth/login',
+  );
+});
+
 test('normalizes missing and duplicate slashes', () => {
   assert.equal(
     buildApiUrl('validation/single', 'https://api.example.com/api/v1///'),
