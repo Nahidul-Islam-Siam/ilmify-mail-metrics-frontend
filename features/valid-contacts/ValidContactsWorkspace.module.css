@@ -363,6 +363,13 @@
   gap: 8px;
 }
 
+.classificationBadges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
 .statusBadge {
   display: inline-flex;
   align-items: center;
@@ -396,6 +403,11 @@
 .suppressed {
   background: #fef3f2;
   color: #b42318;
+}
+
+.neutral {
+  background: #f2f4f7;
+  color: #344054;
 }
 
 .score {

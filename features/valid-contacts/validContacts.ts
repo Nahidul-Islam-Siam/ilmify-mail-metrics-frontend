@@ -1,3 +1,10 @@
+import type {
+  DeliverabilityStatus,
+  EmailType,
+  RiskFlag,
+  VerificationStatus,
+} from '../validation/types';
+
 export type ValidationStatus = 'valid' | 'risky';
 export type ContactStatus = 'sendable' | 'do_not_contact' | 'unsubscribed' | 'bounced';
 export type ContactSource = 'single' | 'bulk';
@@ -8,6 +15,10 @@ export interface ValidatedContact {
   id: string;
   email: string;
   validationStatus: ValidationStatus;
+  deliverabilityStatus: DeliverabilityStatus;
+  emailType: EmailType;
+  verificationStatus: VerificationStatus;
+  riskFlags: RiskFlag[];
   contactStatus: ContactStatus;
   score: number;
   source: ContactSource;
@@ -19,6 +30,9 @@ export interface ValidatedContact {
 export interface ContactFilters {
   search: string;
   validationStatus: ValidationStatus | 'all';
+  deliverabilityStatus: DeliverabilityStatus | 'all';
+  emailType: EmailType | 'all';
+  verificationStatus: VerificationStatus | 'all';
   source: ContactSource | 'all';
   activity: ContactActivity;
   sort: ContactSort;
@@ -36,6 +50,7 @@ export interface ValidContactsPage {
 }
 
 export interface ValidContactsSummary {
+  deliverable: number;
   valid: number;
   risky: number;
   suppressed: number;
@@ -46,6 +61,9 @@ export interface ValidContactsSummary {
 export interface AllMatchingSelectionInput {
   search?: string;
   validationStatus?: ValidationStatus;
+  deliverabilityStatus?: DeliverabilityStatus;
+  emailType?: EmailType;
+  verificationStatus?: VerificationStatus;
   source?: ContactSource;
   activity?: Exclude<ContactActivity, 'all'>;
   dateFrom?: string;
@@ -76,6 +94,9 @@ export type ContactSelection =
 export const DEFAULT_FILTERS: ContactFilters = {
   search: '',
   validationStatus: 'all',
+  deliverabilityStatus: 'all',
+  emailType: 'all',
+  verificationStatus: 'all',
   source: 'all',
   activity: 'all',
   sort: 'newest',
@@ -130,6 +151,13 @@ export function buildSendEmailInput(
       ...(filters.search.trim() ? { search: filters.search.trim() } : {}),
       ...(filters.validationStatus !== 'all'
         ? { validationStatus: filters.validationStatus }
+        : {}),
+      ...(filters.deliverabilityStatus !== 'all'
+        ? { deliverabilityStatus: filters.deliverabilityStatus }
+        : {}),
+      ...(filters.emailType !== 'all' ? { emailType: filters.emailType } : {}),
+      ...(filters.verificationStatus !== 'all'
+        ? { verificationStatus: filters.verificationStatus }
         : {}),
       ...(filters.source !== 'all' ? { source: filters.source } : {}),
       ...(filters.activity !== 'all' ? { activity: filters.activity } : {}),

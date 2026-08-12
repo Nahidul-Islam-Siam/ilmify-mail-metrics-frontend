@@ -20,8 +20,12 @@ afterEach(() => {
 
 const contact = {
   _id: '507f1f77bcf86cd799439011',
-  email: 'one@example.com',
+  email: 'siamnahidul094@gmail.com',
   validationStatus: 'valid',
+  deliverabilityStatus: 'deliverable',
+  emailType: 'free_provider',
+  verificationStatus: 'unverified',
+  riskFlags: ['SMTP_NOT_CHECKED'],
   contactStatus: 'sendable',
   score: 98,
   source: 'single',
@@ -53,11 +57,24 @@ test('serializes server filters and omits all-valued filters', () => {
   );
 });
 
+test('serializes independent classification filters', () => {
+  assert.equal(
+    buildValidContactsQuery({
+      ...DEFAULT_FILTERS,
+      deliverabilityStatus: 'deliverable',
+      emailType: 'free_provider',
+      verificationStatus: 'unverified',
+    }, 1, 20),
+    'deliverabilityStatus=deliverable&emailType=free_provider&verificationStatus=unverified&sort=newest&page=1&limit=20',
+  );
+});
+
 test('maps the intercepted list envelope and accepted send state', () => {
   const page = parseValidContactsPage(pageEnvelope);
 
   assert.equal(page.contacts[0]?.id, contact._id);
   assert.equal(page.contacts[0]?.lastSendStatus, 'sent');
+  assert.equal(page.contacts[0]?.emailType, 'free_provider');
   assert.deepEqual(
     { total: page.total, page: page.page, limit: page.limit, totalPages: page.totalPages, sendableTotal: page.sendableTotal },
     { total: 1, page: 1, limit: 20, totalPages: 1, sendableTotal: 1 },
@@ -75,8 +92,8 @@ test('maps missing send state to never_sent', () => {
 
 test('parses summary and send result envelopes', () => {
   assert.deepEqual(parseValidContactsSummary({
-    data: { valid: 4, risky: 2, suppressed: 1, sent: 3, neverSent: 2 },
-  }), { valid: 4, risky: 2, suppressed: 1, sent: 3, neverSent: 2 });
+    data: { deliverable: 4, valid: 4, risky: 2, suppressed: 1, sent: 3, neverSent: 2 },
+  }), { deliverable: 4, valid: 4, risky: 2, suppressed: 1, sent: 3, neverSent: 2 });
   assert.deepEqual(parseEmailSendResult({
     data: {
       status: 'partial_failure',
@@ -129,7 +146,7 @@ test('loads summary and posts an exact send payload', async () => {
     requests.push({ url: String(input), init });
     const body = init?.method === 'POST'
       ? { status: 'completed', requestedCount: 1, eligibleCount: 1, acceptedCount: 1, failedCount: 0 }
-      : { valid: 1, risky: 0, suppressed: 0, sent: 0, neverSent: 1 };
+      : { deliverable: 1, valid: 1, risky: 0, suppressed: 0, sent: 0, neverSent: 1 };
     return new Response(JSON.stringify({ data: body }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -166,6 +183,13 @@ test('preserves API status and backend validation messages', async () => {
 test('rejects malformed backend contracts', () => {
   assert.throws(
     () => parseValidContactsPage({ data: [{}], pagination: {} }),
+    /Invalid valid contacts response/,
+  );
+  assert.throws(
+    () => parseValidContactsPage({
+      ...pageEnvelope,
+      data: [{ ...contact, emailType: 'personal' }],
+    }),
     /Invalid valid contacts response/,
   );
   assert.equal(new ValidContactsApiError(401, 'Session expired.').status, 401);

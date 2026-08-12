@@ -1,11 +1,11 @@
 'use client';
 
 import { useRef, useState, type ChangeEvent } from 'react';
-import StatusBadge from '@/features/validation/components/StatusBadge';
 import { validateBulkEmails, ValidationApiError } from '@/services/api/validationApi';
 import type { BulkValidationResult, EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
 import { createEmailTemplateWorkbook, parseWorkbookEmails } from '@/features/validation/bulkWorkbook';
+import { getValidationBadges } from '@/features/validation/validationPresentation';
 import {
   createExportFilename,
   createValidationCsv,
@@ -155,8 +155,8 @@ export default function BulkValidationPage() {
   const stats: Array<[string, number, string]> = result
     ? [
         ['Processed', result.processed, '#2563EB'],
-        ['Valid', result.valid, '#10B981'],
-        ['Invalid', result.invalid, '#EF4444'],
+        ['Deliverable', result.deliverable, '#10B981'],
+        ['Undeliverable', result.undeliverable, '#EF4444'],
         ['Risky', result.risky, '#F59E0B'],
         ['Unknown', result.unknown, '#667085'],
       ]
@@ -240,12 +240,14 @@ export default function BulkValidationPage() {
             </div>
             <div style={{ overflowX: 'auto', maxHeight: 520 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                <thead><tr>{['Email', 'Status', 'Score', 'Reasons'].map((title) => <th key={title} style={{ textAlign: 'left', padding: 12, background: '#F8FAFC' }}>{title}</th>)}</tr></thead>
+                <thead><tr>{['Email', 'Deliverability', 'Email type', 'Verification', 'Score', 'Reasons'].map((title) => <th key={title} style={{ textAlign: 'left', padding: 12, background: '#F8FAFC' }}>{title}</th>)}</tr></thead>
                 <tbody>
                   {result.results.map((row: EmailValidationResult) => (
                     <tr key={`${row.email}-${row.checkedAt}`} style={{ borderTop: '1px solid #EAECF0' }}>
                       <td style={{ padding: 12 }}>{row.normalizedEmail}</td>
-                      <td style={{ padding: 12 }}><StatusBadge status={row.status} /></td>
+                      {getValidationBadges(row).map((badge) => (
+                        <td key={badge.label} style={{ padding: 12, color: '#344054', fontWeight: 600 }}>{badge.label}</td>
+                      ))}
                       <td style={{ padding: 12 }}>{row.score}</td>
                       <td style={{ padding: 12, color: '#667085' }}>{row.reasons.join(', ') || 'None'}</td>
                     </tr>

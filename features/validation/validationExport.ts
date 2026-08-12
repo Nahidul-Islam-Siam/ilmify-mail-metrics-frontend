@@ -8,6 +8,10 @@ export interface ExportRow {
   Email: string;
   'Normalized Email': string;
   Status: ValidationStatus;
+  Deliverability: string;
+  'Email Type': string;
+  Verification: string;
+  'Risk Flags': string;
   Score: number;
   Reasons: string;
   Syntax: string;
@@ -23,7 +27,8 @@ export interface ExportRow {
 }
 
 export const EXPORT_HEADERS: Array<keyof ExportRow> = [
-  'Email', 'Normalized Email', 'Status', 'Score', 'Reasons', 'Syntax', 'DNS', 'MX',
+  'Email', 'Normalized Email', 'Status', 'Deliverability', 'Email Type', 'Verification',
+  'Risk Flags', 'Score', 'Reasons', 'Syntax', 'DNS', 'MX',
   'Disposable', 'Public Provider', 'Blacklist', 'Role Account', 'SMTP', 'Ownership', 'Checked At',
 ];
 
@@ -39,6 +44,10 @@ export function mapValidationResultToExportRow(result: EmailValidationResult): E
     Email: result.email,
     'Normalized Email': result.normalizedEmail,
     Status: result.status,
+    Deliverability: result.deliverabilityStatus,
+    'Email Type': result.emailType,
+    Verification: result.verificationStatus,
+    'Risk Flags': result.riskFlags.join(', '),
     Score: result.score,
     Reasons: result.reasons.join(', '),
     Syntax: result.checks.syntax,
@@ -96,7 +105,7 @@ export async function createValidationWorkbook(results: EmailValidationResult[])
   const writer = writeXlsxFile(data, {
     sheet: 'Validation Results',
     stickyRowsCount: 1,
-    columns: [32, 32, 12, 10, 38, 12, 12, 12, 14, 16, 12, 14, 12, 14, 24]
+    columns: [32, 32, 12, 16, 16, 16, 38, 10, 38, 12, 12, 12, 14, 16, 12, 14, 12, 14, 24]
       .map((width) => ({ width })),
   });
 
