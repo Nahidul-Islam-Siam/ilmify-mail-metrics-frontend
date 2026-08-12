@@ -75,7 +75,7 @@ export type ContactSelection =
 
 export const DEFAULT_FILTERS: ContactFilters = {
   search: '',
-  validationStatus: 'valid',
+  validationStatus: 'all',
   source: 'all',
   activity: 'all',
   sort: 'newest',
