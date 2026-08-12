@@ -6,9 +6,31 @@ import type {
   ValidContactsPage,
   ValidContactsSummary,
 } from '@/features/valid-contacts/validContacts';
+import type {
+  DeliverabilityStatus,
+  EmailType,
+  RiskFlag,
+  VerificationStatus,
+} from '@/features/validation/types';
 import { buildApiUrl } from './apiUrl';
 
 const VALIDATION_STATUSES = ['valid', 'risky'] as const;
+const DELIVERABILITY_STATUSES: readonly DeliverabilityStatus[] = [
+  'deliverable', 'risky', 'undeliverable', 'unknown',
+];
+const EMAIL_TYPES: readonly EmailType[] = [
+  'business', 'free_provider', 'role_account', 'disposable',
+];
+const VERIFICATION_STATUSES: readonly VerificationStatus[] = ['verified', 'unverified'];
+const RISK_FLAGS: readonly RiskFlag[] = [
+  'EMAIL_REQUIRED', 'EMAIL_TOO_LONG', 'AT_SIGN_INVALID', 'LOCAL_PART_INVALID',
+  'DOMAIN_INVALID', 'TLD_INVALID', 'WHITESPACE_NOT_ALLOWED', 'CHARACTERS_INVALID',
+  'CONSECUTIVE_DOTS', 'DOT_POSITION_INVALID', 'RFC_SYNTAX_INVALID', 'DNS_NOT_FOUND',
+  'MX_NOT_FOUND', 'ROLE_ACCOUNT', 'BLACKLISTED', 'DISPOSABLE_DOMAIN',
+  'SMTP_NOT_CHECKED', 'SMTP_INCONCLUSIVE', 'MAILBOX_REJECTED',
+  'DNS_TEMPORARILY_UNAVAILABLE', 'DISPOSABLE_CHECK_UNAVAILABLE',
+  'BLACKLIST_CHECK_UNAVAILABLE',
+];
 const CONTACT_STATUSES = [
   'sendable',
   'do_not_contact',
@@ -58,6 +80,11 @@ function parseContact(value: unknown): ValidatedContact {
     || typeof record._id !== 'string'
     || typeof record.email !== 'string'
     || !isOneOf(record.validationStatus, VALIDATION_STATUSES)
+    || !isOneOf(record.deliverabilityStatus, DELIVERABILITY_STATUSES)
+    || !isOneOf(record.emailType, EMAIL_TYPES)
+    || !isOneOf(record.verificationStatus, VERIFICATION_STATUSES)
+    || !Array.isArray(record.riskFlags)
+    || !record.riskFlags.every((flag) => isOneOf(flag, RISK_FLAGS))
     || !isOneOf(record.contactStatus, CONTACT_STATUSES)
     || !isNumber(record.score)
     || !isOneOf(record.source, CONTACT_SOURCES)
@@ -76,6 +103,10 @@ function parseContact(value: unknown): ValidatedContact {
     id: record._id,
     email: record.email,
     validationStatus: record.validationStatus,
+    deliverabilityStatus: record.deliverabilityStatus,
+    emailType: record.emailType,
+    verificationStatus: record.verificationStatus,
+    riskFlags: record.riskFlags,
     contactStatus: record.contactStatus,
     score: record.score,
     source: record.source,
@@ -101,6 +132,13 @@ export function buildValidContactsQuery(
   if (search) query.set('search', search);
   if (filters.validationStatus !== 'all') {
     query.set('validationStatus', filters.validationStatus);
+  }
+  if (filters.deliverabilityStatus !== 'all') {
+    query.set('deliverabilityStatus', filters.deliverabilityStatus);
+  }
+  if (filters.emailType !== 'all') query.set('emailType', filters.emailType);
+  if (filters.verificationStatus !== 'all') {
+    query.set('verificationStatus', filters.verificationStatus);
   }
   if (filters.source !== 'all') query.set('source', filters.source);
   if (filters.activity !== 'all') query.set('activity', filters.activity);
@@ -144,6 +182,7 @@ export function parseValidContactsSummary(
   const summary = asRecord(unwrapData(value));
   if (
     !summary
+    || !isNumber(summary.deliverable)
     || !isNumber(summary.valid)
     || !isNumber(summary.risky)
     || !isNumber(summary.suppressed)
@@ -153,6 +192,7 @@ export function parseValidContactsSummary(
     return invalidResponse('valid contacts summary');
   }
   return {
+    deliverable: summary.deliverable,
     valid: summary.valid,
     risky: summary.risky,
     suppressed: summary.suppressed,

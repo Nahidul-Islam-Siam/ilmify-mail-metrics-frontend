@@ -4,6 +4,10 @@ import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { clearSession } from '@/redux/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import {
+  getValidationBadges,
+  type ValidationBadgeTone,
+} from '@/features/validation/validationPresentation';
+import {
   getValidContactsSummary,
   listValidContacts,
   sendContactEmail,
@@ -29,6 +33,13 @@ import {
 
 const PAGE_SIZE = 20;
 const SHARED_FROM = 'Configured SMTP mailbox';
+
+const BADGE_TONE_CLASSES: Record<ValidationBadgeTone, string> = {
+  success: styles.valid,
+  warning: styles.risky,
+  danger: styles.suppressed,
+  neutral: styles.neutral,
+};
 
 const formatDate = (value: string) => new Intl.DateTimeFormat('en', {
   day: '2-digit',
@@ -86,8 +97,12 @@ function ContactRow({
         </span>
       </span>
       <span className={styles.contactMeta}>
-        <span className={`${styles.statusBadge} ${contact.validationStatus === 'valid' ? styles.valid : styles.risky}`}>
-          {contact.validationStatus}
+        <span className={styles.classificationBadges}>
+          {getValidationBadges(contact).map((badge) => (
+            <span key={badge.label} className={`${styles.statusBadge} ${BADGE_TONE_CLASSES[badge.tone]}`}>
+              {badge.label}
+            </span>
+          ))}
         </span>
         {sendable ? (
           <span className={styles.score}>{contact.score}% score</span>
@@ -114,6 +129,7 @@ export default function ValidContactsWorkspace() {
     sendableTotal: 0,
   });
   const [summary, setSummary] = useState<ValidContactsSummary>({
+    deliverable: 0,
     valid: 0,
     risky: 0,
     suppressed: 0,
@@ -150,6 +166,9 @@ export default function ValidContactsWorkspace() {
   const hasActiveFilters = Boolean(
     filters.search
     || filters.validationStatus !== DEFAULT_FILTERS.validationStatus
+    || filters.deliverabilityStatus !== DEFAULT_FILTERS.deliverabilityStatus
+    || filters.emailType !== DEFAULT_FILTERS.emailType
+    || filters.verificationStatus !== DEFAULT_FILTERS.verificationStatus
     || filters.source !== DEFAULT_FILTERS.source
     || filters.activity !== DEFAULT_FILTERS.activity
     || filters.dateFrom
@@ -169,6 +188,9 @@ export default function ValidContactsWorkspace() {
     [
       debouncedSearch,
       filters.validationStatus,
+      filters.deliverabilityStatus,
+      filters.emailType,
+      filters.verificationStatus,
       filters.source,
       filters.activity,
       filters.sort,
@@ -291,7 +313,7 @@ export default function ValidContactsWorkspace() {
       </header>
 
       <section className={styles.summaryGrid} aria-label="Contact summary">
-        <SummaryCard label="Valid contacts" value={summary.valid} tone="#12B76A" />
+        <SummaryCard label="Deliverable" value={summary.deliverable} tone="#12B76A" />
         <SummaryCard label="Risky contacts" value={summary.risky} tone="#F79009" />
         <SummaryCard label="Suppressed" value={summary.suppressed} tone="#F04438" />
         <SummaryCard label="Previously contacted" value={summary.sent} tone="#7C3AED" />
@@ -342,6 +364,32 @@ export default function ValidContactsWorkspace() {
                 <option value="valid">Valid only</option>
                 <option value="risky">Risky only</option>
                 <option value="all">Valid & risky</option>
+              </select>
+            </label>
+            <label>
+              <span>Deliverability</span>
+              <select value={filters.deliverabilityStatus} onChange={(event) => updateFilter('deliverabilityStatus', event.target.value as ContactFilters['deliverabilityStatus'])}>
+                <option value="all">All deliverability</option>
+                <option value="deliverable">Deliverable</option>
+                <option value="risky">Risky</option>
+              </select>
+            </label>
+            <label>
+              <span>Email type</span>
+              <select value={filters.emailType} onChange={(event) => updateFilter('emailType', event.target.value as ContactFilters['emailType'])}>
+                <option value="all">All email types</option>
+                <option value="business">Business</option>
+                <option value="free_provider">Free provider</option>
+                <option value="role_account">Role account</option>
+                <option value="disposable">Disposable</option>
+              </select>
+            </label>
+            <label>
+              <span>Verification</span>
+              <select value={filters.verificationStatus} onChange={(event) => updateFilter('verificationStatus', event.target.value as ContactFilters['verificationStatus'])}>
+                <option value="all">All verification</option>
+                <option value="verified">Verified</option>
+                <option value="unverified">Unverified</option>
               </select>
             </label>
             <label>

@@ -78,6 +78,9 @@ describe('contact selection', () => {
       {
         ...DEFAULT_FILTERS,
         validationStatus: 'all',
+        deliverabilityStatus: 'deliverable',
+        emailType: 'free_provider',
+        verificationStatus: 'unverified',
         source: 'bulk',
         activity: 'failed',
         search: ' acme ',
@@ -92,6 +95,9 @@ describe('contact selection', () => {
       message: 'Message',
       allMatching: {
         search: 'acme',
+        deliverabilityStatus: 'deliverable',
+        emailType: 'free_provider',
+        verificationStatus: 'unverified',
         source: 'bulk',
         activity: 'failed',
         dateFrom: '2026-08-01',
