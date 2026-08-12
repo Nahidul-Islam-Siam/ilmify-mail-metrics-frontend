@@ -1,11 +1,29 @@
 import type {
   BulkValidationResult,
+  DeliverabilityStatus,
+  EmailType,
   EmailValidationResult,
+  RiskFlag,
   ValidationStatus,
+  VerificationStatus,
 } from '@/features/validation/types';
 import { buildApiUrl } from './apiUrl';
 
 const STATUSES: ValidationStatus[] = ['valid', 'invalid', 'risky', 'unknown'];
+const DELIVERABILITY_STATUSES: DeliverabilityStatus[] = [
+  'deliverable', 'risky', 'undeliverable', 'unknown',
+];
+const EMAIL_TYPES: EmailType[] = ['business', 'free_provider', 'role_account', 'disposable'];
+const VERIFICATION_STATUSES: VerificationStatus[] = ['verified', 'unverified'];
+const RISK_FLAGS: RiskFlag[] = [
+  'EMAIL_REQUIRED', 'EMAIL_TOO_LONG', 'AT_SIGN_INVALID', 'LOCAL_PART_INVALID',
+  'DOMAIN_INVALID', 'TLD_INVALID', 'WHITESPACE_NOT_ALLOWED', 'CHARACTERS_INVALID',
+  'CONSECUTIVE_DOTS', 'DOT_POSITION_INVALID', 'RFC_SYNTAX_INVALID', 'DNS_NOT_FOUND',
+  'MX_NOT_FOUND', 'ROLE_ACCOUNT', 'BLACKLISTED', 'DISPOSABLE_DOMAIN',
+  'SMTP_NOT_CHECKED', 'SMTP_INCONCLUSIVE', 'MAILBOX_REJECTED',
+  'DNS_TEMPORARILY_UNAVAILABLE', 'DISPOSABLE_CHECK_UNAVAILABLE',
+  'BLACKLIST_CHECK_UNAVAILABLE',
+];
 const CHECK_KEYS = [
   'syntax', 'required', 'length', 'atSign', 'localPart', 'domainPart', 'tld', 'spaces',
   'characters', 'consecutiveDots', 'dotPosition', 'rfc', 'dns', 'mx', 'disposable',
@@ -44,6 +62,15 @@ function isEmailValidationResult(value: unknown): value is EmailValidationResult
     typeof result.normalizedEmail === 'string' &&
     typeof result.status === 'string' &&
     STATUSES.includes(result.status as ValidationStatus) &&
+    typeof result.deliverabilityStatus === 'string' &&
+    DELIVERABILITY_STATUSES.includes(result.deliverabilityStatus as DeliverabilityStatus) &&
+    typeof result.emailType === 'string' &&
+    EMAIL_TYPES.includes(result.emailType as EmailType) &&
+    typeof result.verificationStatus === 'string' &&
+    VERIFICATION_STATUSES.includes(result.verificationStatus as VerificationStatus) &&
+    Array.isArray(result.riskFlags) &&
+    result.riskFlags.every((flag) =>
+      typeof flag === 'string' && RISK_FLAGS.includes(flag as RiskFlag)) &&
     typeof result.score === 'number' &&
     hasCompleteChecks(result.checks) &&
     Array.isArray(result.reasons) &&
@@ -96,6 +123,12 @@ export async function validateBulkEmails(
   if (
     typeof result.total !== 'number' ||
     typeof result.processed !== 'number' ||
+    typeof result.deliverable !== 'number' ||
+    typeof result.undeliverable !== 'number' ||
+    typeof result.valid !== 'number' ||
+    typeof result.invalid !== 'number' ||
+    typeof result.risky !== 'number' ||
+    typeof result.unknown !== 'number' ||
     !Array.isArray(result.results) ||
     !result.results.every(isEmailValidationResult)
   ) {

@@ -2,11 +2,15 @@
 
 import { useState, type FormEvent } from 'react';
 import CheckResultCard from '@/features/validation/components/CheckResultCard';
-import StatusBadge from '@/features/validation/components/StatusBadge';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
 import { validateSingleEmail, ValidationApiError } from '@/services/api/validationApi';
 import type { EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
+import {
+  getRiskSummary,
+  getValidationBadges,
+  type ValidationBadgeTone,
+} from '@/features/validation/validationPresentation';
 import {
   EMPTY_EMAIL_WARNING,
   getSingleValidationInputWarning,
@@ -33,6 +37,13 @@ const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   roleAccount: 'Role account',
   smtp: 'SMTP mailbox',
   ownership: 'Ownership verification',
+};
+
+const BADGE_STYLES: Record<ValidationBadgeTone, { background: string; color: string }> = {
+  success: { background: '#ECFDF3', color: '#027A48' },
+  warning: { background: '#FFFAEB', color: '#B54708' },
+  danger: { background: '#FEF3F2', color: '#B42318' },
+  neutral: { background: '#F2F4F7', color: '#344054' },
 };
 
 export default function SingleValidationDashboardPage() {
@@ -101,18 +112,29 @@ export default function SingleValidationDashboardPage() {
               <div>
                 <div style={{ color: '#667085', fontSize: 12 }}>RESULT FOR</div>
                 <h2 style={{ margin: '5px 0' }}>{result.normalizedEmail}</h2>
-                <p style={{ color: '#667085', margin: 0 }}>{result.reasons.length ? result.reasons.join(', ') : 'No risk signals found'}</p>
+                <p style={{ color: '#667085', margin: 0 }}>{getRiskSummary(result.riskFlags)}</p>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <strong style={{ display: 'block', fontSize: 30, marginBottom: 8 }}>{result.score}/100</strong>
-                <StatusBadge status={result.status} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 6 }}>
+                  {getValidationBadges(result).map((badge) => (
+                    <span
+                      key={badge.label}
+                      style={{ ...BADGE_STYLES[badge.tone], borderRadius: 999, fontSize: 12, fontWeight: 700, padding: '5px 9px' }}
+                    >
+                      {badge.label}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
-              {(Object.entries(result.checks) as [keyof EmailValidationResult['checks'], string][]).map(([name, status]) => (
+              {(Object.entries(result.checks) as [keyof EmailValidationResult['checks'], string][])
+                .filter(([name]) => name !== 'publicProvider')
+                .map(([name, status]) => (
                 <CheckResultCard key={name} title={CHECK_LABELS[name]} status={status} />
-              ))}
+                ))}
             </div>
           </section>
         )}
