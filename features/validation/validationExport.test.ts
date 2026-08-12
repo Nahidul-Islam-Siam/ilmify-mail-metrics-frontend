@@ -28,7 +28,7 @@ function result(status: ValidationStatus, email = `${status}@example.com`): Emai
       dns: 'pass', mx: 'pass', disposable: 'pass', publicProvider: 'fail',
       blacklist: 'pass', roleAccount: 'warn', smtp: 'skipped', ownership: 'not_verified',
     },
-    reasons: ['ROLE_ACCOUNT', 'PUBLIC_EMAIL_RESTRICTED'],
+    reasons: ['ROLE_ACCOUNT'],
     checkedAt: '2026-08-09T12:00:00.000Z',
   };
 }
@@ -50,7 +50,7 @@ test('maps the complete validation result to stable export columns', () => {
   assert.equal(row['Email Type'], 'free_provider');
   assert.equal(row.Verification, 'unverified');
   assert.equal(row['Risk Flags'], 'ROLE_ACCOUNT, SMTP_NOT_CHECKED');
-  assert.equal(row.Reasons, 'ROLE_ACCOUNT, PUBLIC_EMAIL_RESTRICTED');
+  assert.equal(row.Reasons, 'ROLE_ACCOUNT');
   assert.equal(row['Public Provider'], 'fail');
   assert.equal(row.Ownership, 'not_verified');
 });
