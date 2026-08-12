@@ -14,6 +14,7 @@ import DomainTable from '@/components/settings/DomainTable';
 import ScoreTable from '@/components/settings/ScoreTable';
 import SaveButton from '@/components/settings/SaveButton';
 import ConfirmationModal from '@/components/settings/ConfirmationModal';
+import { buildApiUrl } from '@/services/api/apiUrl';
 import type { ToastKind } from '@/types/ui';
 
 interface CustomToastProps { message: string; show: boolean; type?: ToastKind; onClose(): void }
@@ -166,7 +167,7 @@ export default function SettingsDashboardPage() {
   const fetchBackendSettings = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/settings', {
+      const res = await fetch(buildApiUrl('/settings'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (res.ok) {
@@ -202,7 +203,7 @@ export default function SettingsDashboardPage() {
         value: settingsMap[k as keyof typeof settingsMap]
       }));
 
-      const res = await fetch('http://localhost:4000/api/settings/update', {
+      const res = await fetch(buildApiUrl('/settings/update'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -230,7 +231,7 @@ export default function SettingsDashboardPage() {
     setSaveLoading(true);
 
     try {
-      const res = await fetch('http://localhost:4000/api/settings/reset', {
+      const res = await fetch(buildApiUrl('/settings/reset'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

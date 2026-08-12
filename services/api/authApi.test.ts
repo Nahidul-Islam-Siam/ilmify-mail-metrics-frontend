@@ -1,8 +1,30 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { parseAuthSession } from './authApi';
+import { AuthApiError, loginRequest, parseAuthSession } from './authApi';
 
 describe('auth API boundary', () => {
+  it('requests login through the versioned API root', async () => {
+    const originalFetch = globalThis.fetch;
+    let requestUrl = '';
+    globalThis.fetch = async (input) => {
+      requestUrl = String(input);
+      return new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    };
+
+    try {
+      await assert.rejects(
+        loginRequest('user@example.com', 'wrong-password'),
+        AuthApiError,
+      );
+      assert.equal(requestUrl, '/api/v1/auth/login');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it('parses a complete backend auth session and normalizes its role', () => {
     assert.deepEqual(parseAuthSession({
       accessToken: 'access.jwt',

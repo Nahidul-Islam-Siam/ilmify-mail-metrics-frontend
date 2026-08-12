@@ -23,10 +23,12 @@
 ### Task 1: Contact filtering and selection model
 
 **Files:**
+
 - Create: `features/valid-contacts/validContacts.ts`
 - Create: `features/valid-contacts/validContacts.test.ts`
 
 **Interfaces:**
+
 - Produces: `ValidatedContact`, `ContactFilters`, `ContactSelection`, `filterContacts`, `toggleContact`, `toggleVisibleContacts`, `selectAllMatching`, `clearSelection`, and `getSelectedCount`.
 
 - [x] **Step 1: Write failing tests**
@@ -65,11 +67,13 @@ Expected: all feature tests PASS.
 ### Task 2: Responsive workspace and composer
 
 **Files:**
+
 - Create: `features/valid-contacts/ValidContactsWorkspace.tsx`
 - Create: `features/valid-contacts/ValidContactsWorkspace.module.css`
 - Create: `app/(dashboard)/dashboard/valid-emails/page.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 1 contact/filter/selection interfaces.
 - Produces: the `/dashboard/valid-emails` page.
 
@@ -94,10 +98,12 @@ Expected: PASS without TypeScript errors.
 ### Task 3: Dashboard navigation
 
 **Files:**
+
 - Modify: `lib/dashboard-navigation.test.ts`
 - Modify: `lib/dashboard-navigation.ts`
 
 **Interfaces:**
+
 - Consumes: the Task 2 route.
 - Produces: a `Valid Emails` dashboard sidebar link.
 
@@ -124,9 +130,11 @@ Expected: PASS.
 ### Task 4: Complete verification
 
 **Files:**
+
 - Verify all files from Tasks 1-3.
 
 **Interfaces:**
+
 - Consumes: the complete frontend slice.
 - Produces: verified design-only implementation ready for backend API wiring.
 

@@ -4,6 +4,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
 import PermissionGuard from '@/components/rbac/PermissionGuard';
 import { usePermission } from '@/features/auth/usePermission';
+import { buildApiUrl } from '@/services/api/apiUrl';
 import type { PermissionDefinition, PermissionName, RbacUser, UserRole } from '@/features/auth/types';
 
 interface ManagedUser extends RbacUser { createdAt: string }
@@ -111,7 +112,7 @@ export default function UserManagementPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:4000/api/users', {
+      const res = await fetch(buildApiUrl('/users'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

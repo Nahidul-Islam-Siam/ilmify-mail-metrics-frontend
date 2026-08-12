@@ -2,6 +2,7 @@
 
 import { useState, type DragEvent, type ChangeEvent } from 'react';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
+import { buildApiUrl } from '@/services/api/apiUrl';
 
 interface ParsedDomain { domain: string; status: 'New' }
 
@@ -73,7 +74,7 @@ export default function BulkImportDisposableDomainsPage() {
     setImporting(true);
     try {
       const domainList = parsedDomains.map(d => d.domain);
-      const res = await fetch('http://localhost:4000/api/disposable-domains/bulk', {
+      const res = await fetch(buildApiUrl('/disposable-domains/bulk'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

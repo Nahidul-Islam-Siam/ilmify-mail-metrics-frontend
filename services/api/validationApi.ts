@@ -69,7 +69,7 @@ export async function validateSingleEmail(
   smtp = true,
   accessToken?: string | null,
 ): Promise<EmailValidationResult> {
-  const response = await fetch(buildApiUrl('/api/validation/single'), {
+  const response = await fetch(buildApiUrl('/validation/single'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify({ email: email.trim().toLowerCase(), smtp }),
@@ -84,7 +84,7 @@ export async function validateBulkEmails(
   emails: string[],
   accessToken?: string | null,
 ): Promise<BulkValidationResult> {
-  const response = await fetch(buildApiUrl('/api/validation/bulk'), {
+  const response = await fetch(buildApiUrl('/validation/bulk'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify({ emails }),
