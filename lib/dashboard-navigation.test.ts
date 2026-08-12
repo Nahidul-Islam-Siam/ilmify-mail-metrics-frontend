@@ -3,11 +3,12 @@ import { describe, it } from 'node:test';
 import { SUPER_ADMIN_NAVIGATION, USER_NAVIGATION } from './dashboard-navigation';
 
 describe('management demo navigation', () => {
-  it('shows only dashboard, single validation, and bulk validation', () => {
+  it('shows validation tools followed by the valid email workspace', () => {
     assert.deepEqual(USER_NAVIGATION.map(({ href }) => href), [
       '/dashboard',
       '/dashboard/validation/single',
       '/dashboard/validation/bulk',
+      '/dashboard/valid-emails',
     ]);
   });
 
