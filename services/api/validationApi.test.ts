@@ -9,17 +9,23 @@ import {
 test('requests single validation through the versioned API root', async () => {
   const originalFetch = globalThis.fetch;
   let requestUrl = '';
-  globalThis.fetch = async (input) => {
+  let requestInit: RequestInit | undefined;
+  globalThis.fetch = async (input, init) => {
     requestUrl = String(input);
+    requestInit = init;
     return new Response(null, { status: 401 });
   };
 
   try {
     await assert.rejects(
-      validateSingleEmail('user@example.com', true, 'access-token'),
+      validateSingleEmail('user@example.com', 'access-token'),
       ValidationApiError,
     );
     assert.equal(requestUrl, '/api/v1/validation/single');
+    assert.deepEqual(JSON.parse(String(requestInit?.body)), {
+      email: 'user@example.com',
+      smtp: false,
+    });
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -111,7 +111,7 @@ test('lists contacts with bearer authentication and an abort signal', async () =
 
   assert.equal(
     requestUrl,
-    '/api/v1/valid-contacts?validationStatus=valid&sort=newest&page=1&limit=20',
+    '/api/v1/valid-contacts?sort=newest&page=1&limit=20',
   );
   assert.equal((requestInit?.headers as Record<string, string>).Authorization, 'Bearer access-token');
   assert.equal(requestInit?.signal, controller.signal);

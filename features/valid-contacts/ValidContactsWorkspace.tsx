@@ -307,7 +307,7 @@ export default function ValidContactsWorkspace() {
                 {isRefreshing && <span className={styles.refreshIndicator}>Updating…</span>}
               </p>
             </div>
-            {(filters.search || filters.validationStatus !== 'valid' || filters.source !== 'all' || filters.activity !== 'all' || filters.dateFrom || filters.dateTo) && (
+            {hasActiveFilters && (
               <button
                 className={styles.clearButton}
                 type="button"

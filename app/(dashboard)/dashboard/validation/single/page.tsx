@@ -55,12 +55,12 @@ export default function SingleValidationDashboardPage() {
     setResult(null);
     try {
       try {
-        setResult(await validateSingleEmail(email, true, token));
+        setResult(await validateSingleEmail(email, token));
       } catch (requestError) {
         if (!(requestError instanceof ValidationApiError) || requestError.status !== 401) throw requestError;
         const refreshedToken = await refreshAccessToken();
         if (!refreshedToken) throw requestError;
-        setResult(await validateSingleEmail(email, true, refreshedToken));
+        setResult(await validateSingleEmail(email, refreshedToken));
       }
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Validation failed');
