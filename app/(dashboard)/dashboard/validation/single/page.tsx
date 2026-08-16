@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import CheckResultCard from '@/features/validation/components/CheckResultCard';
+import {
+  RetryCountdownNotice,
+  RetrySubmitButton,
+} from '@/features/validation/components/RetryCountdownControls';
 import ProtectedRoute from '@/components/rbac/ProtectedRoute';
 import { validateSingleEmail, ValidationApiError } from '@/services/api/validationApi';
 import type { EmailValidationResult } from '@/features/validation/types';
@@ -16,6 +20,11 @@ import {
   EMPTY_EMAIL_WARNING,
   getSingleValidationInputWarning,
 } from '@/features/validation/singleValidationInput';
+import {
+  getRemainingRetrySeconds,
+  getRetryDeadline,
+  startRetryCountdown,
+} from '@/features/validation/retryCountdown';
 
 const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   syntax: 'Syntax',
@@ -55,6 +64,24 @@ export default function SingleValidationDashboardPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EmailValidationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [retryDeadline, setRetryDeadline] = useState<number | null>(null);
+  const [retrySeconds, setRetrySeconds] = useState(0);
+
+  function applyValidationResult(nextResult: EmailValidationResult) {
+    const deadline = getRetryDeadline(nextResult.mailbox);
+    setResult(nextResult);
+    setRetryDeadline(deadline);
+    setRetrySeconds(getRemainingRetrySeconds(deadline));
+  }
+
+  useEffect(() => {
+    if (retryDeadline === null) return;
+
+    return startRetryCountdown(retryDeadline, (remaining) => {
+      setRetrySeconds(remaining);
+      if (remaining === 0) setRetryDeadline(null);
+    });
+  }, [retryDeadline]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,12 +96,12 @@ export default function SingleValidationDashboardPage() {
     setResult(null);
     try {
       try {
-        setResult(await validateSingleEmail(email, token));
+        applyValidationResult(await validateSingleEmail(email, token));
       } catch (requestError) {
         if (!(requestError instanceof ValidationApiError) || requestError.status !== 401) throw requestError;
         const refreshedToken = await refreshAccessToken();
         if (!refreshedToken) throw requestError;
-        setResult(await validateSingleEmail(email, refreshedToken));
+        applyValidationResult(await validateSingleEmail(email, refreshedToken));
       }
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Validation failed');
@@ -102,11 +129,10 @@ export default function SingleValidationDashboardPage() {
             placeholder="person@example.com"
             style={{ flex: 1, padding: '12px 14px', border: '1px solid #D0D5DD', borderRadius: 10, fontSize: 14 }}
           />
-          <button type="submit" disabled={loading} style={{ padding: '12px 24px', border: 0, borderRadius: 10, background: '#7C3AED', color: '#fff', fontWeight: 700 }}>
-            {loading ? 'Validating…' : 'Validate email'}
-          </button>
+          <RetrySubmitButton loading={loading} retrySeconds={retrySeconds} />
         </form>
 
+        <RetryCountdownNotice retrySeconds={retrySeconds} />
         {error && <p role="alert" style={{ color: '#B42318', background: '#FEF3F2', padding: 14, borderRadius: 10 }}>{error}</p>}
 
         {result && (
