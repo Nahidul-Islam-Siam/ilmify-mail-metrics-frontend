@@ -3,7 +3,11 @@ import type {
   DeliverabilityStatus,
   EmailType,
   EmailValidationResult,
+  MailboxProbeOutcome,
+  MailRouting,
   RiskFlag,
+  ValidationReason,
+  ValidationRecommendation,
   ValidationStatus,
   VerificationStatus,
 } from '@/features/validation/types';
@@ -15,7 +19,16 @@ const DELIVERABILITY_STATUSES: DeliverabilityStatus[] = [
 ];
 const EMAIL_TYPES: EmailType[] = ['business', 'free_provider', 'role_account', 'disposable'];
 const VERIFICATION_STATUSES: VerificationStatus[] = ['verified', 'unverified'];
+const RECOMMENDATIONS: ValidationRecommendation[] = [
+  'safe_to_use', 'use_with_caution', 'do_not_use', 'retry_later',
+];
+const MAILBOX_OUTCOMES: MailboxProbeOutcome[] = [
+  'accepted', 'rejected', 'catch_all', 'temporary', 'blocked', 'timeout',
+  'unavailable', 'unexpected', 'skipped',
+];
+const MAIL_ROUTING: MailRouting[] = ['mx', 'implicit', 'null_mx', 'none', 'unknown'];
 const RISK_FLAGS: RiskFlag[] = [
+  'SYNTAX_INVALID',
   'EMAIL_REQUIRED', 'EMAIL_TOO_LONG', 'AT_SIGN_INVALID', 'LOCAL_PART_INVALID',
   'DOMAIN_INVALID', 'TLD_INVALID', 'WHITESPACE_NOT_ALLOWED', 'CHARACTERS_INVALID',
   'CONSECUTIVE_DOTS', 'DOT_POSITION_INVALID', 'RFC_SYNTAX_INVALID', 'DNS_NOT_FOUND',
@@ -24,10 +37,16 @@ const RISK_FLAGS: RiskFlag[] = [
   'DNS_TEMPORARILY_UNAVAILABLE', 'DISPOSABLE_CHECK_UNAVAILABLE',
   'BLACKLIST_CHECK_UNAVAILABLE',
 ];
+const VALIDATION_REASONS: ValidationReason[] = [
+  ...RISK_FLAGS,
+  'ACCEPTED_EMAIL', 'NULL_MX', 'NO_MAIL_ROUTING', 'MAILBOX_NOT_CONFIRMED',
+  'MAILBOX_NOT_CHECKED', 'MAILBOX_VERIFICATION_UNAVAILABLE', 'SMTP_TIMEOUT',
+  'SMTP_TEMPORARY_FAILURE', 'SMTP_BLOCKED', 'SMTP_UNEXPECTED', 'CATCH_ALL_DOMAIN',
+];
 const CHECK_KEYS = [
   'syntax', 'required', 'length', 'atSign', 'localPart', 'domainPart', 'tld', 'spaces',
   'characters', 'consecutiveDots', 'dotPosition', 'rfc', 'dns', 'mx', 'disposable',
-  'publicProvider', 'blacklist', 'roleAccount', 'smtp', 'ownership',
+  'routing', 'routingCheck', 'publicProvider', 'blacklist', 'roleAccount', 'smtp', 'ownership',
 ] as const;
 
 function hasCompleteChecks(value: unknown): value is EmailValidationResult['checks'] {
@@ -39,12 +58,28 @@ function hasCompleteChecks(value: unknown): value is EmailValidationResult['chec
     tld: ['pass', 'fail'], spaces: ['pass', 'fail'], characters: ['pass', 'fail'],
     consecutiveDots: ['pass', 'fail'], dotPosition: ['pass', 'fail'], rfc: ['pass', 'fail'],
     dns: ['pass', 'fail', 'unknown'], mx: ['pass', 'fail', 'unknown'],
+    routing: MAIL_ROUTING, routingCheck: ['pass', 'fail', 'unknown'],
     disposable: ['pass', 'fail', 'unknown'], publicProvider: ['pass', 'fail'],
     blacklist: ['pass', 'fail', 'unknown'], roleAccount: ['pass', 'warn'],
     smtp: ['pass', 'fail', 'unknown', 'skipped'], ownership: ['verified', 'not_verified'],
   };
   return CHECK_KEYS.every((key) =>
     typeof checks[key] === 'string' && outcomes[key].includes(checks[key] as string));
+}
+
+function hasMailboxEvidence(value: unknown): value is EmailValidationResult['mailbox'] {
+  if (!value || typeof value !== 'object') return false;
+  const mailbox = value as Record<string, unknown>;
+  return (
+    typeof mailbox.outcome === 'string' &&
+    MAILBOX_OUTCOMES.includes(mailbox.outcome as MailboxProbeOutcome) &&
+    typeof mailbox.reason === 'string' &&
+    VALIDATION_REASONS.includes(mailbox.reason as ValidationReason) &&
+    typeof mailbox.durationMs === 'number' &&
+    (mailbox.mxHost === undefined || typeof mailbox.mxHost === 'string') &&
+    (mailbox.replyCode === undefined || typeof mailbox.replyCode === 'number') &&
+    (mailbox.replyClass === undefined || [2, 4, 5].includes(mailbox.replyClass as number))
+  );
 }
 
 export class ValidationApiError extends Error {
@@ -71,10 +106,19 @@ function isEmailValidationResult(value: unknown): value is EmailValidationResult
     Array.isArray(result.riskFlags) &&
     result.riskFlags.every((flag) =>
       typeof flag === 'string' && RISK_FLAGS.includes(flag as RiskFlag)) &&
-    typeof result.score === 'number' &&
+    typeof result.reason === 'string' &&
+    VALIDATION_REASONS.includes(result.reason as ValidationReason) &&
+    typeof result.recommendation === 'string' &&
+    RECOMMENDATIONS.includes(result.recommendation as ValidationRecommendation) &&
+    (result.score === null ||
+      (typeof result.score === 'number' && result.score >= 0 && result.score <= 100)) &&
+    hasMailboxEvidence(result.mailbox) &&
     hasCompleteChecks(result.checks) &&
     Array.isArray(result.reasons) &&
-    typeof result.checkedAt === 'string'
+    result.reasons.every((reason) =>
+      typeof reason === 'string' && VALIDATION_REASONS.includes(reason as ValidationReason)) &&
+    typeof result.checkedAt === 'string' &&
+    typeof result.expiresAt === 'string'
   );
 }
 

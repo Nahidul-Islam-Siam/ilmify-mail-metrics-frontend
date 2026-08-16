@@ -17,7 +17,7 @@ const DELIVERABILITY_BADGES: Record<DeliverabilityStatus, ValidationBadge> = {
   deliverable: { label: 'Deliverable', tone: 'success' },
   risky: { label: 'Risky', tone: 'warning' },
   undeliverable: { label: 'Undeliverable', tone: 'danger' },
-  unknown: { label: 'Unknown deliverability', tone: 'neutral' },
+  unknown: { label: 'Unknown', tone: 'neutral' },
 };
 
 const EMAIL_TYPE_BADGES: Record<EmailType, ValidationBadge> = {
@@ -33,6 +33,7 @@ const VERIFICATION_BADGES: Record<VerificationStatus, ValidationBadge> = {
 };
 
 const RISK_FLAG_LABELS: Record<RiskFlag, string> = {
+  SYNTAX_INVALID: 'Invalid email syntax',
   EMAIL_REQUIRED: 'Email is required',
   EMAIL_TOO_LONG: 'Email is too long',
   AT_SIGN_INVALID: 'Invalid @ sign',
@@ -74,4 +75,8 @@ export function getRiskSummary(riskFlags: RiskFlag[]): string {
   return riskFlags.length === 0
     ? 'No risk signals found'
     : riskFlags.map((flag) => RISK_FLAG_LABELS[flag]).join(', ');
+}
+
+export function getQualityScoreLabel(score: number | null): string {
+  return score === null ? 'No quality score' : `Quality score ${score}/100`;
 }

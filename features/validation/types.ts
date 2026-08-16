@@ -3,7 +3,24 @@ export type ValidationCheckState = 'pass' | 'fail' | 'warn' | 'unknown' | 'skipp
 export type DeliverabilityStatus = 'deliverable' | 'risky' | 'undeliverable' | 'unknown';
 export type EmailType = 'business' | 'free_provider' | 'role_account' | 'disposable';
 export type VerificationStatus = 'verified' | 'unverified';
+export type ValidationRecommendation =
+  | 'safe_to_use'
+  | 'use_with_caution'
+  | 'do_not_use'
+  | 'retry_later';
+export type MailboxProbeOutcome =
+  | 'accepted'
+  | 'rejected'
+  | 'catch_all'
+  | 'temporary'
+  | 'blocked'
+  | 'timeout'
+  | 'unavailable'
+  | 'unexpected'
+  | 'skipped';
+export type MailRouting = 'mx' | 'implicit' | 'null_mx' | 'none' | 'unknown';
 export type RiskFlag =
+  | 'SYNTAX_INVALID'
   | 'EMAIL_REQUIRED'
   | 'EMAIL_TOO_LONG'
   | 'AT_SIGN_INVALID'
@@ -26,6 +43,30 @@ export type RiskFlag =
   | 'DNS_TEMPORARILY_UNAVAILABLE'
   | 'DISPOSABLE_CHECK_UNAVAILABLE'
   | 'BLACKLIST_CHECK_UNAVAILABLE';
+export type ValidationReason =
+  | RiskFlag
+  | 'ACCEPTED_EMAIL'
+  | 'NULL_MX'
+  | 'NO_MAIL_ROUTING'
+  | 'MAILBOX_NOT_CONFIRMED'
+  | 'MAILBOX_NOT_CHECKED'
+  | 'MAILBOX_VERIFICATION_UNAVAILABLE'
+  | 'SMTP_TIMEOUT'
+  | 'SMTP_TEMPORARY_FAILURE'
+  | 'SMTP_BLOCKED'
+  | 'SMTP_UNEXPECTED'
+  | 'CATCH_ALL_DOMAIN';
+
+export interface MailboxProbeResult {
+  outcome: MailboxProbeOutcome;
+  reason: ValidationReason;
+  mxHost?: string;
+  replyCode?: number;
+  replyClass?: 2 | 4 | 5;
+  durationMs: number;
+  retryAfterMs?: number;
+  catchAll?: 'confirmed' | 'not_detected' | 'unknown';
+}
 
 export interface EmailValidationResult {
   email: string;
@@ -35,7 +76,10 @@ export interface EmailValidationResult {
   emailType: EmailType;
   verificationStatus: VerificationStatus;
   riskFlags: RiskFlag[];
-  score: number;
+  reason: ValidationReason;
+  recommendation: ValidationRecommendation;
+  score: number | null;
+  mailbox: MailboxProbeResult;
   checks: {
     syntax: 'pass' | 'fail';
     required: 'pass' | 'fail';
@@ -51,6 +95,8 @@ export interface EmailValidationResult {
     rfc: 'pass' | 'fail';
     dns: 'pass' | 'fail' | 'unknown';
     mx: 'pass' | 'fail' | 'unknown';
+    routing: MailRouting;
+    routingCheck: 'pass' | 'fail' | 'unknown';
     disposable: 'pass' | 'fail' | 'unknown';
     publicProvider: 'pass' | 'fail';
     blacklist: 'pass' | 'fail' | 'unknown';
@@ -58,8 +104,9 @@ export interface EmailValidationResult {
     smtp: 'pass' | 'fail' | 'unknown' | 'skipped';
     ownership: 'verified' | 'not_verified';
   };
-  reasons: string[];
+  reasons: ValidationReason[];
   checkedAt: string;
+  expiresAt: string;
 }
 
 export interface BulkValidationResult {

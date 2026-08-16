@@ -35,19 +35,55 @@ test('validation API errors preserve the response status for refresh handling', 
   assert.equal(new ValidationApiError(401, 'Unauthorized').status, 401);
 });
 
+test('parses an unknown professional result with no quality score', () => {
+  const result = {
+    email: 'testtufael@gmail.com',
+    normalizedEmail: 'testtufael@gmail.com',
+    status: 'unknown',
+    deliverabilityStatus: 'unknown',
+    emailType: 'free_provider',
+    verificationStatus: 'unverified',
+    riskFlags: ['SMTP_NOT_CHECKED'],
+    reason: 'MAILBOX_NOT_CHECKED',
+    reasons: ['MAILBOX_NOT_CHECKED'],
+    recommendation: 'retry_later',
+    score: null,
+    mailbox: {
+      outcome: 'skipped',
+      reason: 'MAILBOX_NOT_CHECKED',
+      durationMs: 0,
+    },
+    checks: {
+      syntax: 'pass', required: 'pass', length: 'pass', atSign: 'pass', localPart: 'pass',
+      domainPart: 'pass', tld: 'pass', spaces: 'pass', characters: 'pass', consecutiveDots: 'pass',
+      dotPosition: 'pass', rfc: 'pass', dns: 'pass', mx: 'pass', routing: 'mx',
+      routingCheck: 'pass', disposable: 'pass', publicProvider: 'fail', blacklist: 'pass',
+      roleAccount: 'pass', smtp: 'skipped', ownership: 'not_verified',
+    },
+    checkedAt: '2026-08-16T00:00:00.000Z',
+    expiresAt: '2026-08-17T00:00:00.000Z',
+  };
+
+  assert.deepEqual(parseEmailValidationResponse({ data: result }), result);
+});
+
 test('parses and preserves the complete validation security contract', () => {
   const result = {
     email: 'test@example.com', normalizedEmail: 'test@example.com', status: 'valid', score: 90,
     deliverabilityStatus: 'deliverable', emailType: 'business',
-    verificationStatus: 'unverified', riskFlags: ['SMTP_NOT_CHECKED'],
+    verificationStatus: 'unverified', riskFlags: [],
+    reason: 'ACCEPTED_EMAIL', reasons: ['ACCEPTED_EMAIL'],
+    recommendation: 'safe_to_use',
+    mailbox: { outcome: 'accepted', reason: 'ACCEPTED_EMAIL', durationMs: 12 },
     checks: {
       syntax: 'pass', required: 'pass', length: 'pass', atSign: 'pass', localPart: 'pass',
       domainPart: 'pass', tld: 'pass', spaces: 'pass', characters: 'pass', consecutiveDots: 'pass',
       dotPosition: 'pass', rfc: 'pass', dns: 'pass', mx: 'pass', disposable: 'pass',
+      routing: 'mx', routingCheck: 'pass',
       publicProvider: 'pass', blacklist: 'pass', roleAccount: 'pass', smtp: 'skipped',
       ownership: 'not_verified',
     },
-    reasons: ['SMTP_NOT_CHECKED'], checkedAt: '2026-08-09T00:00:00.000Z',
+    checkedAt: '2026-08-09T00:00:00.000Z', expiresAt: '2026-09-08T00:00:00.000Z',
   };
   assert.deepEqual(parseEmailValidationResponse({ ok: true, status: 200, data: result }), result);
 });
@@ -60,17 +96,21 @@ test('parses a deliverable Gmail address as a free provider without claiming own
     deliverabilityStatus: 'deliverable',
     emailType: 'free_provider',
     verificationStatus: 'unverified',
-    riskFlags: ['SMTP_NOT_CHECKED'],
+    riskFlags: [],
+    reason: 'ACCEPTED_EMAIL',
+    recommendation: 'safe_to_use',
     score: 90,
     checks: {
       syntax: 'pass', required: 'pass', length: 'pass', atSign: 'pass', localPart: 'pass',
       domainPart: 'pass', tld: 'pass', spaces: 'pass', characters: 'pass', consecutiveDots: 'pass',
       dotPosition: 'pass', rfc: 'pass', dns: 'pass', mx: 'pass', disposable: 'pass',
-      publicProvider: 'fail', blacklist: 'pass', roleAccount: 'pass', smtp: 'skipped',
+      routing: 'mx', routingCheck: 'pass', publicProvider: 'fail', blacklist: 'pass', roleAccount: 'pass', smtp: 'pass',
       ownership: 'not_verified',
     },
-    reasons: ['SMTP_NOT_CHECKED'],
+    mailbox: { outcome: 'accepted', reason: 'ACCEPTED_EMAIL', durationMs: 12 },
+    reasons: ['ACCEPTED_EMAIL'],
     checkedAt: '2026-08-12T00:00:00.000Z',
+    expiresAt: '2026-09-11T00:00:00.000Z',
   };
 
   assert.deepEqual(parseEmailValidationResponse({ data: result }), result);
@@ -80,15 +120,19 @@ test('rejects unsupported classification values and risk flags', () => {
   const base = {
     email: 'test@example.com', normalizedEmail: 'test@example.com', status: 'valid', score: 90,
     deliverabilityStatus: 'deliverable', emailType: 'business',
-    verificationStatus: 'unverified', riskFlags: ['SMTP_NOT_CHECKED'],
+    verificationStatus: 'unverified', riskFlags: [],
+    reason: 'ACCEPTED_EMAIL', recommendation: 'safe_to_use',
+    mailbox: { outcome: 'accepted', reason: 'ACCEPTED_EMAIL', durationMs: 12 },
     checks: {
       syntax: 'pass', required: 'pass', length: 'pass', atSign: 'pass', localPart: 'pass',
       domainPart: 'pass', tld: 'pass', spaces: 'pass', characters: 'pass', consecutiveDots: 'pass',
       dotPosition: 'pass', rfc: 'pass', dns: 'pass', mx: 'pass', disposable: 'pass',
+      routing: 'mx', routingCheck: 'pass',
       publicProvider: 'pass', blacklist: 'pass', roleAccount: 'pass', smtp: 'skipped',
       ownership: 'not_verified',
     },
-    reasons: ['SMTP_NOT_CHECKED'], checkedAt: '2026-08-12T00:00:00.000Z',
+    reasons: ['ACCEPTED_EMAIL'], checkedAt: '2026-08-12T00:00:00.000Z',
+    expiresAt: '2026-09-11T00:00:00.000Z',
   };
 
   for (const invalid of [

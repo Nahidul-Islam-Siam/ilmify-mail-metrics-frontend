@@ -53,8 +53,8 @@ export default function LiveValidator({ inputRef }: { inputRef?: RefObject<HTMLI
   return (
     <div className="glass checker-card" style={{ transform: 'translateY(-14px)' }}>
       <span className="chk-badge">MailMetric Live Check</span>
-      <h3 className="chk-title">Validating <b>200+</b> signals<br />in real-time</h3>
-      <p className="chk-desc">Format · domain · MX · disposable · AI score</p>
+      <h3 className="chk-title">Validation backed by<br /><b>clear evidence</b></h3>
+      <p className="chk-desc">Syntax · mail routing · policy · mailbox evidence</p>
 
       <div className="chk-input">
         <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.8" /><path d="M4 7l8 6 8-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
@@ -72,7 +72,11 @@ export default function LiveValidator({ inputRef }: { inputRef?: RefObject<HTMLI
       <div className={`chk-result${result ? ' show' : ''}`}>
         {result && (
           <>
-            <ScoreRing score={result.score} />
+            {result.score === null ? (
+              <div className="score-ring"><strong>—</strong><span>No score</span></div>
+            ) : (
+              <ScoreRing score={result.score} />
+            )}
             <div className="chk-verdict">
               <b>{verdict[0]}</b>
               <span className="vtag" style={{ color: verdict[1], background: verdict[2] }}>
@@ -90,7 +94,7 @@ export default function LiveValidator({ inputRef }: { inputRef?: RefObject<HTMLI
 
       <div className="satisfied">
         <div className="faces"><i></i><i></i><i></i></div>
-        <div><b>99.2% accuracy</b><span>Trusted by 8,000+ senders</span></div>
+        <div><b>Evidence-based results</b><span>Unknown stays unknown when proof is unavailable</span></div>
       </div>
     </div>
   );

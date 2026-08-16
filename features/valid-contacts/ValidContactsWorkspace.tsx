@@ -105,7 +105,7 @@ function ContactRow({
           ))}
         </span>
         {sendable ? (
-          <span className={styles.score}>{contact.score}% score</span>
+          <span className={styles.score}>Quality score {contact.score}/100</span>
         ) : (
           <span className={`${styles.statusBadge} ${styles.suppressed}`}>{contact.contactStatus.replaceAll('_', ' ')}</span>
         )}
