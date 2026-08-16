@@ -1,4 +1,8 @@
-import type { EmailValidationResult, ValidationStatus } from './types';
+import type {
+  DeliverabilityStatus,
+  EmailValidationResult,
+  ValidationStatus,
+} from './types';
 import writeXlsxFile from 'write-excel-file/browser';
 
 export type ExportFilter = 'all' | ValidationStatus;
@@ -7,12 +11,16 @@ export type ExportFormat = 'csv' | 'xlsx';
 export interface ExportRow {
   Email: string;
   'Normalized Email': string;
-  Status: ValidationStatus;
-  Deliverability: string;
+  Status: DeliverabilityStatus;
+  'Legacy Status': ValidationStatus;
+  Reason: string;
+  Recommendation: string;
+  'Quality Score': number | '';
+  'Mailbox Outcome': string;
+  Routing: string;
   'Email Type': string;
   Verification: string;
   'Risk Flags': string;
-  Score: number;
   Reasons: string;
   Syntax: string;
   DNS: string;
@@ -24,12 +32,14 @@ export interface ExportRow {
   SMTP: string;
   Ownership: string;
   'Checked At': string;
+  'Expires At': string;
 }
 
 export const EXPORT_HEADERS: Array<keyof ExportRow> = [
-  'Email', 'Normalized Email', 'Status', 'Deliverability', 'Email Type', 'Verification',
-  'Risk Flags', 'Score', 'Reasons', 'Syntax', 'DNS', 'MX',
-  'Disposable', 'Public Provider', 'Blacklist', 'Role Account', 'SMTP', 'Ownership', 'Checked At',
+  'Email', 'Normalized Email', 'Status', 'Reason', 'Recommendation', 'Quality Score',
+  'Mailbox Outcome', 'Routing', 'Email Type', 'Verification', 'Legacy Status',
+  'Risk Flags', 'Reasons', 'Syntax', 'DNS', 'MX', 'Disposable', 'Public Provider',
+  'Blacklist', 'Role Account', 'SMTP', 'Ownership', 'Checked At', 'Expires At',
 ];
 
 export function filterValidationResults(
@@ -43,12 +53,16 @@ export function mapValidationResultToExportRow(result: EmailValidationResult): E
   return {
     Email: result.email,
     'Normalized Email': result.normalizedEmail,
-    Status: result.status,
-    Deliverability: result.deliverabilityStatus,
+    Status: result.deliverabilityStatus,
+    Reason: result.reason,
+    Recommendation: result.recommendation,
+    'Quality Score': result.score ?? '',
+    'Mailbox Outcome': result.mailbox.outcome,
+    Routing: result.checks.routing,
     'Email Type': result.emailType,
     Verification: result.verificationStatus,
+    'Legacy Status': result.status,
     'Risk Flags': result.riskFlags.join(', '),
-    Score: result.score,
     Reasons: result.reasons.join(', '),
     Syntax: result.checks.syntax,
     DNS: result.checks.dns,
@@ -60,6 +74,7 @@ export function mapValidationResultToExportRow(result: EmailValidationResult): E
     SMTP: result.checks.smtp,
     Ownership: result.checks.ownership,
     'Checked At': result.checkedAt,
+    'Expires At': result.expiresAt,
   };
 }
 
@@ -105,7 +120,7 @@ export async function createValidationWorkbook(results: EmailValidationResult[])
   const writer = writeXlsxFile(data, {
     sheet: 'Validation Results',
     stickyRowsCount: 1,
-    columns: [32, 32, 12, 16, 16, 16, 38, 10, 38, 12, 12, 12, 14, 16, 12, 14, 12, 14, 24]
+    columns: [32, 32, 16, 28, 20, 14, 18, 14, 16, 16, 14, 38, 38, 12, 12, 12, 14, 16, 12, 14, 12, 14, 24, 24]
       .map((width) => ({ width })),
   });
 

@@ -5,7 +5,7 @@ import { validateBulkEmails, ValidationApiError } from '@/services/api/validatio
 import type { BulkValidationResult, EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
 import { createEmailTemplateWorkbook, parseWorkbookEmails } from '@/features/validation/bulkWorkbook';
-import { getValidationBadges } from '@/features/validation/validationPresentation';
+import { getQualityScoreLabel, getValidationBadges } from '@/features/validation/validationPresentation';
 import {
   createExportFilename,
   createValidationCsv,
@@ -240,15 +240,15 @@ export default function BulkValidationPage() {
             </div>
             <div style={{ overflowX: 'auto', maxHeight: 520 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                <thead><tr>{['Email', 'Deliverability', 'Email type', 'Verification', 'Score', 'Reasons'].map((title) => <th key={title} style={{ textAlign: 'left', padding: 12, background: '#F8FAFC' }}>{title}</th>)}</tr></thead>
+                <thead><tr>{['Email', 'Deliverability', 'Email type', 'Verification', 'Quality score', 'Reasons'].map((title) => <th key={title} style={{ textAlign: 'left', padding: 12, background: '#F8FAFC' }}>{title}</th>)}</tr></thead>
                 <tbody>
-                  {result.results.map((row: EmailValidationResult) => (
+                  {filteredResults.map((row: EmailValidationResult) => (
                     <tr key={`${row.email}-${row.checkedAt}`} style={{ borderTop: '1px solid #EAECF0' }}>
                       <td style={{ padding: 12 }}>{row.normalizedEmail}</td>
                       {getValidationBadges(row).map((badge) => (
                         <td key={badge.label} style={{ padding: 12, color: '#344054', fontWeight: 600 }}>{badge.label}</td>
                       ))}
-                      <td style={{ padding: 12 }}>{row.score}</td>
+                      <td style={{ padding: 12 }}>{getQualityScoreLabel(row.score)}</td>
                       <td style={{ padding: 12, color: '#667085' }}>{row.reasons.join(', ') || 'None'}</td>
                     </tr>
                   ))}
