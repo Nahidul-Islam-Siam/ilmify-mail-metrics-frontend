@@ -25,6 +25,7 @@ import {
   getRetryDeadline,
   startRetryCountdown,
 } from '@/features/validation/retryCountdown';
+import { getDisposableValidationWarning } from '@/features/validation/disposableValidationWarning';
 
 const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   syntax: 'Syntax',
@@ -66,6 +67,9 @@ export default function SingleValidationDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryDeadline, setRetryDeadline] = useState<number | null>(null);
   const [retrySeconds, setRetrySeconds] = useState(0);
+  const disposableWarning = result
+    ? getDisposableValidationWarning(result)
+    : null;
 
   function applyValidationResult(nextResult: EmailValidationResult) {
     const deadline = getRetryDeadline(nextResult.mailbox);
@@ -137,6 +141,24 @@ export default function SingleValidationDashboardPage() {
 
         {result && (
           <section style={{ marginTop: 24, display: 'grid', gap: 20 }}>
+            {disposableWarning && (
+              <div
+                role="alert"
+                style={{
+                  background: '#FEF3F2',
+                  border: '1px solid #FDA29B',
+                  borderRadius: 12,
+                  padding: 16,
+                  color: '#B42318',
+                }}
+              >
+                <strong style={{ display: 'block', marginBottom: 4 }}>
+                  {disposableWarning.title}
+                </strong>
+                <span>{disposableWarning.message}</span>
+              </div>
+            )}
+
             <div style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 18, padding: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ color: '#667085', fontSize: 12 }}>RESULT FOR</div>
