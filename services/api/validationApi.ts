@@ -94,7 +94,7 @@ export function parseEmailValidationResponse(value: unknown): EmailValidationRes
 export async function validateSingleEmail(
   email: string,
   accessToken?: string | null,
-  smtp = false,
+  smtp = true,
 ): Promise<EmailValidationResult> {
   const response = await fetch(buildApiUrl('/validation/single'), {
     method: 'POST',

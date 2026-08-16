@@ -24,7 +24,7 @@ test('requests single validation through the versioned API root', async () => {
     assert.equal(requestUrl, '/api/v1/validation/single');
     assert.deepEqual(JSON.parse(String(requestInit?.body)), {
       email: 'user@example.com',
-      smtp: false,
+      smtp: true,
     });
   } finally {
     globalThis.fetch = originalFetch;
