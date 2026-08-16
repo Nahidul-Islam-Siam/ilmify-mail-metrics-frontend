@@ -73,11 +73,11 @@ export default function SettingsDashboardPage() {
     enable_rfc_validation: true,
     enable_dns_check: true,
     enable_mx_record_check: true,
-    enable_smtp_verification: true,
+    enable_smtp_verification: false,
     enable_disposable_check: true,
     enable_blacklist_check: true,
-    enable_spam_trap_detection: true,
-    enable_catch_all_detection: true,
+    enable_spam_trap_detection: false,
+    enable_catch_all_detection: false,
     enable_role_email_detection: true,
 
     // Disposable
@@ -98,7 +98,7 @@ export default function SettingsDashboardPage() {
     ],
 
     // SMTP
-    smtp_verification_enabled: true,
+    smtp_verification_enabled: false,
     smtp_timeout_seconds: 10,
     smtp_retry_attempts: 3,
     smtp_daily_limit: 50000,
@@ -385,7 +385,7 @@ export default function SettingsDashboardPage() {
           {activeSection === 'validation' && (
             <SettingsCard
               title="2. Email Validation Engine Pipeline"
-              subtitle="Toggle active verification modules in real-time. Changes affect single and bulk verification tasks."
+              subtitle="Review implemented validation modules and capabilities that still require a mailbox worker."
               icon="✅"
             >
               <form onSubmit={handleSaveSection}>
@@ -423,15 +423,16 @@ export default function SettingsDashboardPage() {
 
                 <ToggleSwitch
                   label="Enable Deep SMTP Handshake Verification"
-                  description="Establish socket connection with mail server and issue RCPT TO probes without sending email."
-                  checked={settingsMap.enable_smtp_verification}
-                  onChange={(v) => setKey('enable_smtp_verification', v)}
-                  badgeText={settingsMap.enable_smtp_verification ? 'Active' : 'Disabled'}
+                  description="Unavailable until mailbox worker is configured. Disabled results remain Unknown rather than Deliverable."
+                  checked={false}
+                  onChange={() => undefined}
+                  disabled
+                  badgeText="Unavailable"
                 />
 
                 <ToggleSwitch
                   label="Enable Disposable Email Detection"
-                  description="Cross-reference domain against 100k+ burner and temporary email providers."
+                  description="Check the domain against the configured disposable-provider data source."
                   checked={settingsMap.enable_disposable_check}
                   onChange={(v) => setKey('enable_disposable_check', v)}
                   badgeText={settingsMap.enable_disposable_check ? 'Active' : 'Disabled'}
@@ -439,7 +440,7 @@ export default function SettingsDashboardPage() {
 
                 <ToggleSwitch
                   label="Enable Blacklist & Abuse Check"
-                  description="Check target domain against global spammer and domain blocklists (Spamhaus, SURBL)."
+                  description="Check the address and domain against the application's internal blocklist policy."
                   checked={settingsMap.enable_blacklist_check}
                   onChange={(v) => setKey('enable_blacklist_check', v)}
                   badgeText={settingsMap.enable_blacklist_check ? 'Active' : 'Disabled'}
@@ -447,10 +448,20 @@ export default function SettingsDashboardPage() {
 
                 <ToggleSwitch
                   label="Enable AI Spam Trap & Honeypot Detection"
-                  description="Flag known spam traps, seeds, and high-risk honeypot addresses."
-                  checked={settingsMap.enable_spam_trap_detection}
-                  onChange={(v) => setKey('enable_spam_trap_detection', v)}
-                  badgeText={settingsMap.enable_spam_trap_detection ? 'Active' : 'Disabled'}
+                  description="Unavailable until a reviewed spam-trap evidence provider is configured."
+                  checked={false}
+                  onChange={() => undefined}
+                  disabled
+                  badgeText="Unavailable"
+                />
+
+                <ToggleSwitch
+                  label="Enable Catch-all Detection"
+                  description="Unavailable until mailbox worker is configured. Catch-all evidence cannot confirm an individual mailbox."
+                  checked={false}
+                  onChange={() => undefined}
+                  disabled
+                  badgeText="Unavailable"
                 />
 
                 <SaveButton loading={saveLoading} onReset={() => setShowResetModal(true)} />
@@ -544,9 +555,11 @@ export default function SettingsDashboardPage() {
               <form onSubmit={handleSaveSection}>
                 <ToggleSwitch
                   label="SMTP Verification Probing"
-                  description="Issue RCPT TO socket checks against destination mail servers."
-                  checked={settingsMap.smtp_verification_enabled}
-                  onChange={(v) => setKey('smtp_verification_enabled', v)}
+                  description="Unavailable until mailbox worker is configured. This is separate from email sending SMTP."
+                  checked={false}
+                  onChange={() => undefined}
+                  disabled
+                  badgeText="Unavailable"
                 />
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginTop: '16px' }}>

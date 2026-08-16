@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
+import { readFileSync } from 'node:fs';
 import {
   clearSelection,
   buildSendEmailInput,
@@ -10,6 +11,18 @@ import {
   toggleContact,
   toggleVisibleContacts,
 } from './validContacts';
+
+const workspaceSource = readFileSync(
+  new URL('./ValidContactsWorkspace.tsx', import.meta.url),
+  'utf8',
+);
+
+describe('contact score presentation', () => {
+  it('labels the numeric value as a quality score, not a percentage', () => {
+    assert.doesNotMatch(workspaceSource, /\{contact\.score\}% score/);
+    assert.match(workspaceSource, /Quality score \{contact\.score\}\/100/);
+  });
+});
 
 describe('composer validation', () => {
   it('requires at least one sendable recipient', () => {

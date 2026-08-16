@@ -8,6 +8,7 @@ import type { EmailValidationResult } from '@/features/validation/types';
 import { usePermission } from '@/features/auth/usePermission';
 import {
   getRiskSummary,
+  getQualityScoreLabel,
   getValidationBadges,
   type ValidationBadgeTone,
 } from '@/features/validation/validationPresentation';
@@ -31,6 +32,8 @@ const CHECK_LABELS: Record<keyof EmailValidationResult['checks'], string> = {
   rfc: 'RFC-compatible syntax',
   dns: 'DNS',
   mx: 'MX records',
+  routing: 'Mail routing',
+  routingCheck: 'Routing availability',
   disposable: 'Disposable domain',
   publicProvider: 'Public email provider',
   blacklist: 'Internal blacklist',
@@ -85,7 +88,7 @@ export default function SingleValidationDashboardPage() {
       <main style={{ maxWidth: 1000, margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
         <header style={{ marginBottom: 24 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#101828', marginBottom: 6 }}>Single Email Validation</h1>
-          <p style={{ color: '#667085', margin: 0 }}>Check all syntax, DNS/MX, reputation, blacklist, ownership, and optional SMTP rules.</p>
+          <p style={{ color: '#667085', margin: 0 }}>Check syntax, mail routing, configured policy sources, ownership evidence, and mailbox evidence when available.</p>
         </header>
 
         <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 18, padding: 24, display: 'flex', gap: 12 }}>
@@ -115,7 +118,7 @@ export default function SingleValidationDashboardPage() {
                 <p style={{ color: '#667085', margin: 0 }}>{getRiskSummary(result.riskFlags)}</p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <strong style={{ display: 'block', fontSize: 30, marginBottom: 8 }}>{result.score}/100</strong>
+                <strong style={{ display: 'block', fontSize: 22, marginBottom: 8 }}>{getQualityScoreLabel(result.score)}</strong>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 6 }}>
                   {getValidationBadges(result).map((badge) => (
                     <span
@@ -127,6 +130,16 @@ export default function SingleValidationDashboardPage() {
                   ))}
                 </div>
               </div>
+            </div>
+
+            <div style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 18, padding: 20 }}>
+              <h3 style={{ margin: '0 0 14px', fontSize: 16 }}>Validation evidence</h3>
+              <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 14, margin: 0 }}>
+                <div><dt style={{ color: '#667085', fontSize: 12 }}>Primary reason</dt><dd style={{ margin: '4px 0 0', fontWeight: 700 }}>{result.reason}</dd></div>
+                <div><dt style={{ color: '#667085', fontSize: 12 }}>Recommendation</dt><dd style={{ margin: '4px 0 0', fontWeight: 700 }}>{result.recommendation.replaceAll('_', ' ')}</dd></div>
+                <div><dt style={{ color: '#667085', fontSize: 12 }}>Mailbox outcome</dt><dd style={{ margin: '4px 0 0', fontWeight: 700 }}>{result.mailbox.outcome.replaceAll('_', ' ')}</dd></div>
+                <div><dt style={{ color: '#667085', fontSize: 12 }}>Result expires</dt><dd style={{ margin: '4px 0 0', fontWeight: 700 }}>{new Date(result.expiresAt).toLocaleString()}</dd></div>
+              </dl>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
