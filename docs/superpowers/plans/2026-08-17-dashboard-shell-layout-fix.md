@@ -45,7 +45,7 @@
 - Consumes: existing `Sidebar`, `Topbar`, `AuthenticatedRoute`, and `ChildrenProps`.
 - Produces: `DashboardLayout` shell classes consumed visually by all dashboard routes.
 
-- [ ] **Step 1: Write the failing shell contract tests**
+- [x] **Step 1: Write the failing shell contract tests**
 
 Create a Node source-contract test that reads the layout, hook, and CSS module. Assert that:
 
@@ -62,7 +62,7 @@ assert.match(css, /overflow:\s*hidden/);
 assert.match(css, /overflow-y:\s*auto/);
 ```
 
-- [ ] **Step 2: Run the focused test and verify red**
+- [x] **Step 2: Run the focused test and verify red**
 
 Run:
 
@@ -72,7 +72,7 @@ npm test -- components/layouts/dashboardShellUi.test.ts
 
 Expected: FAIL because the hook/CSS module do not exist and the layout has no named shell classes.
 
-- [ ] **Step 3: Implement the mobile-menu hook**
+- [x] **Step 3: Implement the mobile-menu hook**
 
 Implement a focused client hook using `usePathname`, `useCallback`, `useEffect`, and `useState`:
 
@@ -91,7 +91,7 @@ export function useDashboardMobileMenu(): DashboardMobileMenu {
 }
 ```
 
-- [ ] **Step 4: Implement the viewport shell**
+- [x] **Step 4: Implement the viewport shell**
 
 Replace layout inline objects with CSS-module classes. The component shape remains small:
 
@@ -121,7 +121,7 @@ return (
 
 Use grid/flex rules so `.shell` is `height: 100dvh; overflow: hidden`, `.mainColumn` cannot overflow horizontally, and `.content` is the sole `overflow-y: auto` page region.
 
-- [ ] **Step 5: Run the focused test and TypeScript check**
+- [x] **Step 5: Run the focused test and TypeScript check**
 
 Run:
 
@@ -132,7 +132,7 @@ npm run typecheck
 
 Expected: focused test PASS and TypeScript exits 0.
 
-- [ ] **Step 6: Commit Task 1 only**
+- [x] **Step 6: Commit Task 1 only**
 
 ```bash
 git add components/layouts/DashboardLayout.tsx \
