@@ -206,13 +206,15 @@ git commit -m "refactor: isolate responsive dashboard sidebar"
 **Files:**
 - Create: `components/dashboard/Topbar.module.css`
 - Modify: `components/dashboard/Topbar.tsx`
+- Modify: `components/layouts/DashboardLayout.tsx`
+- Modify: `components/layouts/SuperAdminLayout.tsx`
 - Modify: `components/layouts/dashboardShellUi.test.ts`
 
 **Interfaces:**
 - Consumes: `{ menuOpen: boolean; onMenuClick(): void }` and existing permission/logout behavior.
 - Produces: a menu button controlling `dashboard-navigation` with correct expanded state.
 
-- [ ] **Step 1: Extend the failing topbar tests**
+- [x] **Step 1: Extend the failing topbar tests**
 
 Assert the topbar has its own CSS module and the menu trigger contains:
 
@@ -225,15 +227,18 @@ type="button"
 
 Also assert the large root inline style objects are removed.
 
-- [ ] **Step 2: Run the focused test and verify red**
+- [x] **Step 2: Run the focused test and verify red**
 
 Run `npm test -- components/layouts/dashboardShellUi.test.ts`.
 
-- [ ] **Step 3: Refactor topbar presentation into its CSS module**
+- [x] **Step 3: Refactor topbar presentation into its CSS module**
 
 Keep logout, role badge selection, search markup, and account identity behavior unchanged. Use classes for layout, search, credits, logout, avatar, identity, and breakpoint visibility. Hide low-priority credits/profile text before allowing horizontal overflow.
 
-- [ ] **Step 4: Verify focused tests and TypeScript**
+Pass `menuOpen={menu.isOpen}` from `DashboardLayout` so the trigger communicates its current state without moving mobile-menu ownership into the topbar.
+Keep `onMenuClick` optional and pass `menuOpen={false}` from the existing Super Admin shell so it does not render a non-functional mobile trigger.
+
+- [x] **Step 4: Verify focused tests and TypeScript**
 
 Run:
 
@@ -242,11 +247,13 @@ npm test -- components/layouts/dashboardShellUi.test.ts
 npm run typecheck
 ```
 
-- [ ] **Step 5: Commit Task 3 only**
+- [x] **Step 5: Commit Task 3 only**
 
 ```bash
 git add components/dashboard/Topbar.tsx \
   components/dashboard/Topbar.module.css \
+  components/layouts/DashboardLayout.tsx \
+  components/layouts/SuperAdminLayout.tsx \
   components/layouts/dashboardShellUi.test.ts
 git commit -m "refactor: isolate responsive dashboard topbar"
 ```
