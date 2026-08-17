@@ -153,24 +153,25 @@ git commit -m "fix: stabilize dashboard shell scrolling"
 - Consumes: `{ isOpen: boolean }`, `USER_NAVIGATION`, `usePermission()`, and `usePathname()`.
 - Produces: `<aside id="dashboard-navigation" data-open={isOpen}>` for the topbar control relationship and mobile drawer styling.
 
-- [ ] **Step 1: Extend the failing test for sidebar semantics**
+- [x] **Step 1: Extend the failing test for sidebar semantics**
 
-Assert the component uses its own CSS module, removes the root inline style, exposes `id="dashboard-navigation"`, supplies `aria-label="Primary navigation"`, and maps the open state to an explicit class.
+Assert the component uses its own CSS module, removes the root inline style, exposes `id="dashboard-navigation"`, supplies `aria-label="Primary navigation"`, and exposes the open state through `data-open` without duplicating the shell transform.
 
-- [ ] **Step 2: Run the focused test and verify red**
+- [x] **Step 2: Run the focused test and verify red**
 
 Run `npm test -- components/layouts/dashboardShellUi.test.ts`.
 
 Expected: FAIL on missing sidebar module/semantic contract.
 
-- [ ] **Step 3: Implement the focused sidebar**
+- [x] **Step 3: Implement the focused sidebar**
 
 Use named elements and styles:
 
 ```tsx
 <aside
   aria-label="Primary navigation"
-  className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}
+  className={styles.sidebar}
+  data-open={isOpen}
   id="dashboard-navigation"
 >
   <Link className={styles.brand} href="/dashboard">MailMetric</Link>
@@ -180,9 +181,9 @@ Use named elements and styles:
 </aside>
 ```
 
-The nav section scrolls independently if necessary; the identity remains at the bottom. At `max-width: 900px`, transform the sidebar off canvas and apply `.open` to reveal it.
+The nav section scrolls independently if necessary; the identity remains at the bottom. At `max-width: 900px`, the sidebar fills the responsive slot created in Task 1. The shell wrapper remains the single owner of off-canvas transform behavior, while the sidebar exposes its explicit open state without duplicating that layout logic.
 
-- [ ] **Step 4: Verify the focused test and TypeScript**
+- [x] **Step 4: Verify the focused test and TypeScript**
 
 Run:
 
@@ -191,7 +192,7 @@ npm test -- components/layouts/dashboardShellUi.test.ts
 npm run typecheck
 ```
 
-- [ ] **Step 5: Commit Task 2 only**
+- [x] **Step 5: Commit Task 2 only**
 
 ```bash
 git add components/dashboard/Sidebar.tsx \
