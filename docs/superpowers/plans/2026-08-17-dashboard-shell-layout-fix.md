@@ -101,7 +101,9 @@ const menu = useDashboardMobileMenu();
 return (
   <AuthenticatedRoute>
     <div className={styles.shell}>
-      <Sidebar isOpen={menu.isOpen} />
+      <div className={`${styles.sidebarSlot} ${menu.isOpen ? styles.sidebarSlotOpen : ''}`}>
+        <Sidebar isOpen={menu.isOpen} />
+      </div>
       <button
         aria-label="Close navigation menu"
         className={`${styles.backdrop} ${menu.isOpen ? styles.backdropOpen : ''}`}
@@ -109,7 +111,7 @@ return (
         type="button"
       />
       <div className={styles.mainColumn}>
-        <Topbar menuOpen={menu.isOpen} onMenuClick={menu.toggle} />
+        <Topbar onMenuClick={menu.toggle} />
         <main className={styles.content}>{children}</main>
       </div>
     </div>
