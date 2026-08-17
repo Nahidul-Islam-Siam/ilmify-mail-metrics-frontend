@@ -268,15 +268,15 @@ git commit -m "refactor: isolate responsive dashboard topbar"
 - Consumes: existing `DashboardOverview` markup and data.
 - Produces: metric and skeleton grids that wrap without horizontal page overflow.
 
-- [ ] **Step 1: Add a failing responsive-grid contract**
+- [x] **Step 1: Add a failing responsive-grid contract**
 
 Read the CSS module and assert `.metricGrid` and `.skeletonGrid` use the same `repeat(auto-fit, minmax(...))` sizing or equivalent container-safe rules, plus `min-width: 0` on page/panel boundaries.
 
-- [ ] **Step 2: Run the focused overview test and verify red**
+- [x] **Step 2: Run the focused overview test and verify red**
 
 Run `npm test -- features/dashboard/dashboardOverviewUi.test.ts`.
 
-- [ ] **Step 3: Implement minimal responsive grid changes**
+- [x] **Step 3: Implement minimal responsive grid changes**
 
 Use one shared declaration such as:
 
@@ -289,7 +289,7 @@ Use one shared declaration such as:
 
 Retain the existing one-column mobile layout and do not change dashboard labels, metrics, or API state.
 
-- [ ] **Step 4: Run dashboard tests and TypeScript**
+- [x] **Step 4: Run dashboard tests and TypeScript**
 
 Run:
 
@@ -300,7 +300,7 @@ npm test -- features/dashboard/dashboardOverview.test.ts \
 npm run typecheck
 ```
 
-- [ ] **Step 5: Commit Task 4 only**
+- [x] **Step 5: Commit Task 4 only**
 
 ```bash
 git add features/dashboard/DashboardOverview.module.css \
