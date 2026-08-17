@@ -38,12 +38,16 @@ On tablet and mobile:
 
 ## Component Boundaries
 
-- `DashboardLayout` owns the shell, mobile-menu state, backdrop, and scroll regions.
+- `DashboardLayout` remains a small composition component. It connects the shell, mobile-menu state, backdrop, and content slot without absorbing sidebar or topbar markup.
 - `Sidebar` owns navigation and identity presentation. It receives open/close state but does not own global layout.
 - `Topbar` owns search, credits, logout, identity, and the mobile-menu trigger.
+- A focused mobile-navigation boundary owns backdrop, Escape handling, route-change closing, and temporary scroll locking when keeping those behaviors inside the layout would make it difficult to read.
+- Shared layout styles live in a dedicated CSS module instead of being repeated as inline style objects across components.
 - `DashboardOverview` keeps its existing real-data behavior. Only its responsive metric-grid sizing may be adjusted so available content width, rather than the full viewport, determines card wrapping.
 
 Inline layout declarations will be replaced only where necessary by named CSS-module classes. No unrelated visual redesign is included in this first task.
+
+Each component has one clear responsibility, a typed public interface, and focused tests where it contains behavior. Route pages remain thin wrappers, and no new all-in-one dashboard page or oversized component is introduced.
 
 ## Responsive Rules
 
