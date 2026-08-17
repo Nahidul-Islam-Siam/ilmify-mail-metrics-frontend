@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: ChildrenProps) {
         />
 
         <div className={styles.mainColumn}>
-          <Topbar onMenuClick={menu.toggle} />
+          <Topbar menuOpen={menu.isOpen} onMenuClick={menu.toggle} />
           <main className={styles.content}>{children}</main>
         </div>
       </div>

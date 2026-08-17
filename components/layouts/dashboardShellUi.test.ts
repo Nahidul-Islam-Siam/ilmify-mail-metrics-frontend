@@ -15,6 +15,8 @@ const mobileMenuHook = readSource('./useDashboardMobileMenu.ts');
 const layoutStyles = readSource('./DashboardLayout.module.css');
 const sidebar = readSource('../dashboard/Sidebar.tsx');
 const sidebarStyles = readSource('../dashboard/Sidebar.module.css');
+const topbar = readSource('../dashboard/Topbar.tsx');
+const topbarStyles = readSource('../dashboard/Topbar.module.css');
 
 test('dashboard layout isolates its fixed chrome from its scrolling content', () => {
   assert.match(layout, /styles\.shell/);
@@ -53,4 +55,20 @@ test('dashboard sidebar owns focused navigation and identity presentation', () =
   );
   assert.match(sidebarStyles, /\.identity\s*\{[\s\S]*?margin-top:\s*auto/);
   assert.match(sidebarStyles, /@media\s*\(max-width:\s*900px\)/);
+});
+
+test('dashboard topbar exposes an accessible responsive menu control', () => {
+  assert.match(topbar, /import styles from '\.\/Topbar\.module\.css'/);
+  assert.match(topbar, /menuOpen:\s*boolean/);
+  assert.match(topbar, /aria-controls="dashboard-navigation"/);
+  assert.match(topbar, /aria-expanded=\{menuOpen\}/);
+  assert.match(
+    topbar,
+    /aria-label=\{menuOpen\s*\?\s*'Close navigation menu'\s*:\s*'Open navigation menu'\}/,
+  );
+  assert.match(topbar, /type="button"/);
+  assert.doesNotMatch(topbar, /style=\{\{/);
+  assert.match(layout, /menuOpen=\{menu\.isOpen\}/);
+  assert.match(topbarStyles, /\.controls\s*\{[\s\S]*?min-width:\s*0/);
+  assert.match(topbarStyles, /@media\s*\(max-width:\s*900px\)/);
 });
