@@ -46,6 +46,8 @@ test('dashboard sidebar owns focused navigation and identity presentation', () =
   assert.match(sidebar, /import styles from '\.\/Sidebar\.module\.css'/);
   assert.match(sidebar, /aria-label="Primary navigation"/);
   assert.match(sidebar, /id="dashboard-navigation"/);
+  assert.match(sidebar, /item\.preview/);
+  assert.match(sidebar, />Preview</);
   assert.match(sidebar, /data-open=\{isOpen\}/);
   assert.match(sidebar, /styles\.sidebar/);
   assert.doesNotMatch(sidebar, /<aside\s+style=/);

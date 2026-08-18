@@ -15,7 +15,7 @@ export default function SuperAdminSidebar() {
       <nav style={{ display: 'grid', gap: 5 }}>
         {SUPER_ADMIN_NAVIGATION.map((item) => {
           const active = pathname === item.href;
-          return <Link key={item.href} href={item.href} style={{ padding: '10px 12px', borderRadius: 9, color: active ? '#fff' : '#CBD5E1', background: active ? '#6D28D9' : 'transparent', textDecoration: 'none', fontSize: 13, fontWeight: active ? 700 : 500 }}>{item.label}</Link>;
+          return <Link key={item.href} href={item.href} style={{ padding: '10px 12px', borderRadius: 9, color: active ? '#fff' : '#CBD5E1', background: active ? '#6D28D9' : 'transparent', textDecoration: 'none', fontSize: 13, fontWeight: active ? 700 : 500 }}>{item.label}{item.preview ? ' · Preview' : ''}</Link>;
         })}
       </nav>
       <div style={{ marginTop: 28, padding: 12, borderTop: '1px solid #334155', fontSize: 12 }}><strong style={{ display: 'block', color: '#fff' }}>{user?.name}</strong>{user?.email}</div>

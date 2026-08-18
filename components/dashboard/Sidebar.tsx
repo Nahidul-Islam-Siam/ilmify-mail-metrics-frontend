@@ -36,7 +36,10 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               href={item.href}
               key={item.href}
             >
-              {item.label}
+              <span>{item.label}</span>
+              {item.preview ? (
+                <span className={styles.previewBadge}>Preview</span>
+              ) : null}
             </Link>
           );
         })}

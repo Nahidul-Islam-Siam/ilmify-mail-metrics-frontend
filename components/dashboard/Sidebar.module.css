@@ -50,6 +50,10 @@
 }
 
 .navLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 10px 12px;
   border-radius: 9px;
   color: #475467;
@@ -57,6 +61,18 @@
   font-weight: 500;
   text-decoration: none;
   transition: color 140ms ease, background 140ms ease;
+}
+
+.previewBadge {
+  flex: none;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .navLink:hover {
