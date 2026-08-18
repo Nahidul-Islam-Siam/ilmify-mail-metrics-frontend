@@ -12,7 +12,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
-  const { role, user } = usePermission();
+  const { permissions, role, user } = usePermission();
 
   return (
     <aside
@@ -26,7 +26,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       </Link>
       <p className={styles.sectionLabel}>User workspace</p>
       <nav className={styles.navigation}>
-        {getUserNavigation(role).map((item) => {
+        {getUserNavigation(role, permissions).map((item) => {
           const active = pathname === item.href;
 
           return (

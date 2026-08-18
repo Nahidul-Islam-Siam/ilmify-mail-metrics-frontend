@@ -27,6 +27,19 @@ describe('management demo navigation', () => {
     );
   });
 
+  it('shows Settings only to users who can manage settings', () => {
+    assert.ok(
+      getUserNavigation('Admin', ['settings.manage']).some(
+        ({ href }) => href === '/dashboard/settings',
+      ),
+    );
+    assert.ok(
+      !getUserNavigation('User', []).some(
+        ({ href }) => href === '/dashboard/settings',
+      ),
+    );
+  });
+
   it('keeps management links in the Super Admin navigation', () => {
     assert.ok(SUPER_ADMIN_NAVIGATION.some(({ href }) => href === '/dashboard/users'));
     assert.ok(!USER_NAVIGATION.some(({ href }) => href === '/dashboard/users'));

@@ -1,8 +1,9 @@
-import type { RoleName } from '@/features/auth/types';
+import type { PermissionName, RoleName } from '@/features/auth/types';
 
 export interface DashboardNavigationItem {
   label: string;
   href: string;
+  permission?: PermissionName;
   roles?: RoleName[];
 }
 
@@ -13,7 +14,11 @@ export const USER_NAVIGATION: DashboardNavigationItem[] = [
   { label: 'Valid Emails', href: '/dashboard/valid-emails' },
   // { label: 'Validation history', href: '/dashboard/history' },
   // { label: 'Subscription', href: '/dashboard/subscription' },
-  // { label: 'Settings', href: '/dashboard/settings' },
+  {
+    label: 'Settings',
+    href: '/dashboard/settings',
+    permission: 'settings.manage',
+  },
   {
     label: 'Super Admin area',
     href: '/super-admin',
@@ -21,10 +26,19 @@ export const USER_NAVIGATION: DashboardNavigationItem[] = [
   },
 ];
 
-export function getUserNavigation(role: RoleName): DashboardNavigationItem[] {
-  return USER_NAVIGATION.filter(
-    (item) => !item.roles || item.roles.includes(role),
-  );
+export function getUserNavigation(
+  role: RoleName,
+  permissions: PermissionName[] = [],
+): DashboardNavigationItem[] {
+  return USER_NAVIGATION.filter((item) => {
+    const roleAllowed = !item.roles || item.roles.includes(role);
+    const permissionAllowed =
+      !item.permission ||
+      role === 'Super Admin' ||
+      permissions.includes(item.permission);
+
+    return roleAllowed && permissionAllowed;
+  });
 }
 
 export const SUPER_ADMIN_NAVIGATION: DashboardNavigationItem[] = [
