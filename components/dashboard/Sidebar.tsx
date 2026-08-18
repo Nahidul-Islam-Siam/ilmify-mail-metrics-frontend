@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { USER_NAVIGATION } from '../../lib/dashboard-navigation';
+import { getUserNavigation } from '../../lib/dashboard-navigation';
 import { usePermission } from '@/features/auth/usePermission';
 import styles from './Sidebar.module.css';
 
@@ -12,7 +12,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
-  const { user } = usePermission();
+  const { role, user } = usePermission();
 
   return (
     <aside
@@ -26,7 +26,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       </Link>
       <p className={styles.sectionLabel}>User workspace</p>
       <nav className={styles.navigation}>
-        {USER_NAVIGATION.map((item) => {
+        {getUserNavigation(role).map((item) => {
           const active = pathname === item.href;
 
           return (

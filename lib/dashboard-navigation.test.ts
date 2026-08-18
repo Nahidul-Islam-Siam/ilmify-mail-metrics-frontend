@@ -1,15 +1,30 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { SUPER_ADMIN_NAVIGATION, USER_NAVIGATION } from './dashboard-navigation';
+import {
+  getUserNavigation,
+  SUPER_ADMIN_NAVIGATION,
+  USER_NAVIGATION,
+} from './dashboard-navigation';
 
 describe('management demo navigation', () => {
-  it('shows validation tools followed by the valid email workspace', () => {
-    assert.deepEqual(USER_NAVIGATION.map(({ href }) => href), [
+  it('keeps incomplete user features hidden', () => {
+    assert.deepEqual(getUserNavigation('User').map(({ href }) => href), [
       '/dashboard',
       '/dashboard/validation/single',
       '/dashboard/validation/bulk',
       '/dashboard/valid-emails',
     ]);
+  });
+
+  it('restores the working Super Admin area only for Super Admins', () => {
+    assert.ok(
+      getUserNavigation('Super Admin').some(
+        ({ href }) => href === '/super-admin',
+      ),
+    );
+    assert.ok(
+      !getUserNavigation('User').some(({ href }) => href === '/super-admin'),
+    );
   });
 
   it('keeps management links in the Super Admin navigation', () => {
